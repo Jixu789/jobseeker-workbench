@@ -608,22 +608,71 @@
   .radar-status { font-size:11.5px; line-height:1.6; color:var(--text-tertiary); margin:8px 0 9px; }
   .radar-status.err { color:var(--warning); }
   .radar-list { max-height:430px; overflow:auto; display:flex; flex-direction:column; gap:8px; padding-right:2px; }
-  .radar-item { display:flex; gap:10px; align-items:flex-start; padding:10px 11px;
-    border:1px solid var(--border); border-radius:11px; background:var(--surface-nested); }
-  .radar-item:hover { border-color:var(--border-input); }
-  .radar-item .rc { display:flex; padding-top:3px; }
+  .radar-item { display:flex; gap:12px; align-items:flex-start; padding:14px 16px 13px;
+    border:1px solid var(--border); border-radius:14px; background:var(--surface-card); cursor:pointer;
+    transition:border-color .15s, box-shadow .15s; }
+  .radar-item:hover { border-color:var(--accent); box-shadow:0 4px 14px rgba(35,58,104,.08); }
+  .radar-item:focus-visible { outline:2px solid var(--accent); outline-offset:2px; }
+  .radar-item .rc { display:flex; padding-top:5px; }
   .radar-item .rc input { width:15px; height:15px; min-height:0; padding:0; margin:0; flex:0 0 auto; accent-color:var(--accent); cursor:pointer; }
-  .radar-item .rm { flex:1; min-width:0; }
-  .radar-item .rt { font-size:13.5px; font-weight:800; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-  .radar-item .rs { font-size:11.5px; color:var(--text-secondary); margin-top:3px; }
-  .radar-item .rd { font-size:11.5px; color:var(--text-tertiary); line-height:1.6; margin-top:4px;
-    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .radar-item .rtags { display:flex; flex-wrap:wrap; gap:5px; margin-top:6px; }
-  .radar-item .rtags .chip { font-size:11px; padding:3px 8px; }
-  .radar-item .ra { display:flex; flex-direction:column; align-items:flex-end; gap:6px; flex:0 0 auto; }
+  .radar-item .rm { flex:1; min-width:0; display:flex; flex-direction:column; gap:7px; }
+  .radar-item .rhead { display:flex; align-items:flex-start; gap:12px; }
+  .radar-item .rt { font-size:15px; font-weight:800; line-height:1.35; letter-spacing:-.01em;
+    flex:1; min-width:0; display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+  .radar-item .rpay { flex:0 0 auto; font-size:14px; font-weight:800; color:var(--danger); white-space:nowrap; }
+  .radar-item .rmeta { display:flex; flex-wrap:wrap; gap:6px; align-items:center; }
+  .radar-item .mpill { font-size:11.5px; color:var(--text-secondary); background:var(--surface-nested);
+    border:1px solid var(--border); border-radius:6px; padding:2px 7px; white-space:nowrap; line-height:1.5; }
+  .radar-item .rco { display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:12px; color:var(--text-secondary); }
+  .radar-item .rlogo { width:22px; height:22px; border-radius:7px; flex:0 0 auto;
+    background:linear-gradient(135deg,var(--accent),#5a76b8); color:#fff; font-size:11.5px; font-weight:800;
+    display:grid; place-items:center; }
+  .radar-item .rco .rco-name { color:var(--text); font-weight:700; font-size:12.5px; }
+  .radar-item .rsep { width:1px; height:11px; background:var(--border); }
+  .radar-item .ra { display:grid; grid-template-columns:auto auto; gap:6px 10px; align-items:center;
+    justify-items:end; flex:0 0 auto; padding-top:1px; }
+  .radar-item .ra .rd-hint { grid-column:1 / -1; font-size:11px; color:var(--text-tertiary); white-space:nowrap; }
+  .radar-item:hover .ra .rd-hint { color:var(--accent); }
   .radar-link { font-size:11.5px; color:var(--accent); text-decoration:none; }
   .radar-link:hover { text-decoration:underline; }
   .radar-empty { padding:24px 16px; text-align:center; font-size:12.5px; color:var(--text-secondary); line-height:1.7; }
+
+  /* 岗位雷达 · 详情弹窗（对齐招聘站职位详情：左职位信息、右公司信息） */
+  .rd-head { display:flex; align-items:flex-start; gap:14px; }
+  .rd-t { font-size:20px; font-weight:800; letter-spacing:-.01em; line-height:1.4; }
+  .rd-sub { font-size:12.5px; color:var(--text-secondary); margin-top:5px; }
+  .rd-hi { margin-left:auto; flex:0 0 auto; font-size:15px; font-weight:800; color:var(--danger); white-space:nowrap; }
+  .rd-acts { display:flex; align-items:center; gap:9px; flex-wrap:wrap; margin:16px 0 16px; }
+  .rd-meta { display:flex; flex-wrap:wrap; gap:7px 18px; font-size:12.5px; color:var(--text-secondary);
+    padding:11px 13px; background:var(--surface-nested); border-radius:var(--radius-tile); margin-bottom:16px; }
+  .rd-meta span { display:inline-flex; align-items:center; gap:6px; }
+  .rd-grid { display:grid; grid-template-columns:1fr 264px; gap:14px; align-items:start; }
+  .rd-facts { display:grid; grid-template-columns:repeat(2,1fr); gap:9px 14px; }
+  .rd-facts.col { grid-template-columns:1fr; margin-top:12px; }
+  .rd-facts div { display:flex; gap:8px; font-size:12.5px; align-items:baseline; min-width:0; }
+  .rd-facts span { color:var(--text-tertiary); flex:0 0 60px; }
+  .rd-facts b { font-weight:600; color:var(--text); min-width:0; word-break:break-word; }
+  .rd-desc { margin-top:12px; padding-top:11px; border-top:1px solid var(--border);
+    font-size:12.5px; line-height:1.85; color:var(--text-secondary); }
+  .rd-co { display:flex; gap:10px; align-items:center; margin-bottom:4px; }
+  .rd-co .rlogo.lg { width:34px; height:34px; border-radius:9px; font-size:15px; }
+  .rd-co b { font-size:13px; display:block; }
+  .rd-co .tiny { margin-top:3px; }
+  .rd-card { border:1px solid var(--border); border-radius:var(--radius-tile); padding:13px; background:var(--surface-card); }
+  .rd-card + .rd-card { margin-top:12px; }
+  .rd-h { font-size:13px; font-weight:800; margin-bottom:9px; display:flex; align-items:center; gap:7px; }
+  .rd-note { margin-top:12px; padding:11px 12px; border-radius:var(--radius-tile); background:var(--surface-nested);
+    font-size:12px; line-height:1.75; color:var(--text-secondary); }
+  .rd-note b { color:var(--text); }
+  @media (max-width:900px){
+    .radar-item { padding:12px 12px 11px; gap:9px; }
+    .radar-item .rt { font-size:14px; }
+    .radar-item .ra .rd-hint { display:none; }
+    .rd-grid { grid-template-columns:1fr; }
+    .rd-t { font-size:18px; }
+    .rd-hi { font-size:13.5px; }
+    .rd-facts { grid-template-columns:1fr; }
+  }
 
   /* 补 JD 向导 */
   .jw-url { font-size:11px; color:var(--text-tertiary); word-break:break-all; line-height:1.6; margin:-2px 0 10px; }
@@ -2610,19 +2659,30 @@ function radarStatusText(){
 function radarItemHTML(it){
   const exists=radarExists(it);
   const checked=RADAR.selected.has(it.rid)?"checked":"";
-  const meta=[esc(it.company), esc(it.city), it.edu?esc(it.edu):"", it.type?esc(it.type):"", it.deadline?"截止 "+esc(it.deadline):"", it.date?esc(it.date)+" 发布":""]
-    .filter(Boolean).join(" · ");
-  return `<div class="radar-item" data-rid="${it.rid}">
+  const hi=it.deadline?`截止 ${radarDay(it.deadline)}`:(it.type||it.kind||"示例");
+  const pills=[it.city, it.type, it.edu].filter(p=>p&&p!==hi);
+  const tags=(it.tags||[]).filter(Boolean).slice(0,5);
+  const shown=new Set([...pills,...tags]);
+  const coMeta=[it.org,
+    (it.industry&&!shown.has(it.industry))?it.industry:((it.dir&&!shown.has(it.dir))?it.dir:""),
+    it.kind].filter((v,i,a)=>v&&a.indexOf(v)===i);
+  return `<div class="radar-item" data-rid="${it.rid}" data-open="${it.rid}" role="button" tabindex="0"
+      aria-label="${attr(it.title)}，点击查看岗位详情">
     <label class="rc"><input type="checkbox" data-pick="${it.rid}" ${checked}/></label>
     <div class="rm">
-      <div class="rt">${esc(it.title)}<span class="badge">${esc(it.org)}</span><span class="badge">${esc(it.dir)}</span>${it.kind?`<span class="badge">${esc(it.kind)}</span>`:""}${it.demo?'<span class="badge demo">示例</span>':""}</div>
-      <div class="rs">${meta}</div>
-      <div class="rd">${esc(it.desc)}</div>
-      ${(it.tags||[]).length?`<div class="rtags">${it.tags.map(t=>`<span class="chip">${esc(t)}</span>`).join("")}</div>`:""}
+      <div class="rhead"><div class="rt">${esc(it.title)}${it.demo?'<span class="badge demo">示例</span>':""}</div>
+        <div class="rpay">${esc(hi)}</div></div>
+      <div class="rmeta">${pills.map(p=>`<span class="mpill">${esc(p)}</span>`).join("")}
+        ${tags.map(t=>`<span class="mpill">${esc(radarStr(t,20))}</span>`).join("")}</div>
+      <div class="rco"><span class="rlogo">${esc(radarStr(it.company,1)||"公")}</span>
+        <span class="rco-name">${esc(it.company)}</span>
+        ${coMeta.map(m=>`<span class="rsep"></span><span>${esc(m)}</span>`).join("")}
+        ${it.date?`<span class="rsep"></span><span>${esc(it.date)} 发布</span>`:""}</div>
     </div>
     <div class="ra">
       ${exists?'<span class="badge ok">已在库</span>':`<button class="btn line sm" data-radar-add="${it.rid}">加入</button>`}
       ${it.url?`<a class="radar-link" href="${attr(it.url)}" target="_blank" rel="noopener">原文</a>`:""}
+      <span class="rd-hint">查看详情 →</span>
     </div>
   </div>`;
 }
@@ -2664,6 +2724,82 @@ function radarRenderPanel(){
 function radarCountUpdate(){
   const b=$("#radar-import"); if(b) b.innerHTML=`${icon("plus",15,2.4)} 加入岗位库（${RADAR.selected.size}）`;
 }
+function radarById(rid){ return radarAll().find(x=>x.rid===rid)||null; }
+/* 岗位雷达 · 详情弹窗：左「职位信息」、右「公司信息」，对齐招聘站职位详情页 */
+function openRadarDetail(rid){
+  const it=radarById(rid); if(!it) return;
+  const job=(data.jobs||[]).find(j=>String(j.title||"").trim()===it.title && String(j.company||"").trim()===it.company);
+  const hi=it.deadline?`截止 ${radarDay(it.deadline)}`:(it.type||"公告招聘");
+  const facts=[
+    ["城市", it.city||"—"],
+    ["招聘项目", it.program||it.type||"—"],
+    ["公告批次", [it.cohort,it.batch].filter(Boolean).join(" ")||"—"],
+    ["所属方向", it.dir||"—"],
+    ["学历要求", it.edu||"公告未标注"],
+    ["截止时间", it.deadline||"未公布"],
+    ["发布时间", it.date||"—"],
+    ["信息来源", it.source||"公开校招公告"],
+  ];
+  const tags=(it.tags||[]).filter(Boolean);
+  const coMeta=[it.org, it.industry||it.dir, it.kind].filter(Boolean);
+  const ov=openModal(`<div class="rd-head">
+      <div style="min-width:0">
+        <div class="rd-t">${esc(it.title)}${it.demo?' <span class="badge demo">示例</span>':""}</div>
+        <div class="rd-sub">${esc(it.company)} · ${esc(it.city)}${it.dir?` · ${esc(it.dir)}`:""}</div>
+      </div>
+      <div class="rd-hi">${esc(hi)}</div>
+    </div>
+    <div class="rd-acts">
+      ${job?`<button class="btn sm" id="rd-open-job">${icon("briefcase",14)} 查看已入库岗位</button>`
+           :`<button class="btn sm" id="rd-add">${icon("plus",14,2.4)} 加入岗位库</button>`}
+      ${it.url?`<a class="btn line sm" href="${attr(it.url)}" target="_blank" rel="noopener">${icon("file",14)} 打开公告原文</a>`:""}
+      <button class="btn ghost sm" id="rd-close">关闭</button>
+    </div>
+    <div class="rd-meta">
+      <span>${icon("building",14)} ${esc(it.company)}</span>
+      <span>${icon("target",14)} ${esc(it.type||"应届生 · 校招")}</span>
+      <span>${icon("award",14)} ${esc(it.edu||"学历以公告为准")}</span>
+      <span>${icon("calendar",14)} ${esc(it.deadline?`截止 ${radarDay(it.deadline)}`:"截止时间未公布")}</span>
+    </div>
+    <div class="rd-grid">
+      <div>
+        <div class="rd-h">${icon("briefcase",14)} 职位信息</div>
+        <div class="rd-facts">${facts.map(([k,v])=>`<div><span>${esc(k)}</span><b>${esc(radarStr(v,60))}</b></div>`).join("")}</div>
+        ${it.desc?`<div class="rd-desc">${esc(it.desc)}</div>`:""}
+        ${it.kind
+          ? `<div class="rd-note"><b>关于岗位职责 / 任职要求：</b>这条目来自公开校招公告，原公告只写招聘项目与专业方向，没有逐条职位描述。加入岗位库后会进入「补 JD」向导：打开原文，把职责、要求两栏填进去，再做匹配分析。</div>`
+          : ""}
+      </div>
+      <div>
+        <div class="rd-card">
+          <div class="rd-co"><span class="rlogo lg">${esc(radarStr(it.company,1)||"公")}</span>
+            <div style="min-width:0"><b>${esc(it.company)}</b><div class="tiny">${esc(coMeta.join(" · ")||"企业信息未标注")}</div></div></div>
+          <div class="rd-facts col">
+            <div><span>企业类型</span><b>${esc(it.org||"未标注")}</b></div>
+            <div><span>所属行业</span><b>${esc(it.industry||it.dir||"未标注")}</b></div>
+            <div><span>工作城市</span><b>${esc(it.city||"—")}</b></div>
+            <div><span>岗位方向</span><b>${esc(it.dir||"—")}</b></div>
+          </div>
+        </div>
+        <div class="rd-card">
+          <div class="rd-h">${icon("spark",14)} 关键词</div>
+          <div class="chips" style="margin:0">${tags.length?tags.map(t=>`<span class="chip nice">${esc(radarStr(t,20))}</span>`).join(""):'<span class="tiny">公告未标注关键词</span>'}</div>
+        </div>
+      </div>
+    </div>`, true);
+  ov.querySelector("#rd-close").onclick=()=>ov.remove();
+  const add=ov.querySelector("#rd-add");
+  if(add) add.onclick=()=>{
+    const r=radarImport([it]);
+    const nid=(r.all||[])[0];
+    ov.remove();
+    toast(r.add?`已加入「${it.title}」`:`「${it.title}」已在岗位库`);
+    if(!nid) return;
+    if(it.kind) openJdWizard([nid]); else openJobDetail(nid);
+  };
+  const openJob=ov.querySelector("#rd-open-job");
+  if(openJob) openJob.onclick=()=>{ ov.remove(); openJobDetail(job.id); };
+}
 function radarWireItems(){
   const wrap=$("#radar-list"); if(!wrap) return;
   wrap.querySelectorAll("input[data-pick]").forEach(cb=>cb.onchange=()=>{
@@ -2675,6 +2811,11 @@ function radarWireItems(){
     const r=radarImport([it]);
     toast(r.add?`已加入「${it.title}」`:`「${it.title}」已在岗位库`);
     if(r.ids&&r.ids.length) openJdWizard(r.ids);
+  });
+  wrap.querySelectorAll("[data-open]").forEach(el=>{
+    const open=()=>openRadarDetail(el.dataset.open);
+    el.onclick=e=>{ if(e.target.closest("input,button,a,label")) return; open(); };
+    el.onkeydown=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); open(); } };
   });
 }
 function wireRadar(){
@@ -2736,7 +2877,7 @@ async function radarFetch(auto){
 }
 function radarImport(items){
   let add=0, dup=0, notice=0;
-  const ids=[];
+  const ids=[], allIds=[];
   data.jobs=data.jobs||[];
   items.forEach(it=>{
     if(radarExists(it)){ dup++; return; }
@@ -2746,14 +2887,14 @@ function radarImport(items){
       salary:it.salary||"", channel:it.kind?`岗位雷达 · ${it.kind}`:`岗位雷达 · ${it.source||"公开源"}`,
       deadline:it.deadline||"", status:"在投", jd, parsed:parseJD(jd),
       srcUrl:it.url||"", jdPending:!!it.kind, radarKind:it.kind||"" };
-    data.jobs.unshift(rec); add++; if(it.kind) ids.push(rec.id);
+    data.jobs.unshift(rec); add++; allIds.push(rec.id); if(it.kind) ids.push(rec.id);
     if(it.kind) notice++;
   });
   if(add){
     if(!data.activeJobId) data.activeJobId=data.jobs[0].id;
     store.save(); render();
   }
-  return {add,dup,notice,ids};
+  return {add,dup,notice,ids,all:allIds};
 }
 function radarImportSelected(){
   const items=radarAll().filter(x=>RADAR.selected.has(x.rid));

@@ -142,7 +142,7 @@
     <span>一个离线可用的求职工作台：把「岗位 JD + 个人简历」变成一份有针对性的简历、一场能练的模拟面试，以及一组真正加分的反问。</span>
   </h1>
   <div class="meta-line">
-    <span>版本 v1.3</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
+    <span>版本 v1.4</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
   </div>
 </header>
 
@@ -150,7 +150,7 @@
   <div class="metric"><b>10<em>个</em></b><span>导航入口，覆盖投递前到面试后</span></div>
   <div class="metric"><b>8<em>类</em></b><span>可复用 AI 提示词，支持提示词工坊</span></div>
   <div class="metric"><b>31<em>组</em></b><span>本地技能词典，无网络也能算匹配</span></div>
-  <div class="metric"><b>51<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
+  <div class="metric"><b>53<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
 </div>
 
 <main>
@@ -211,7 +211,7 @@ flowchart LR
       <tbody>
         <tr><td><strong>首页</strong></td><td>我现在该做什么</td><td>今日待办、当前岗位与简历、匹配分、下一步动作建议</td></tr>
         <tr><td><strong>求职流程</strong></td><td>整条路走到哪了</td><td>五步向导 + 进度指示灯，点击可直达对应视图</td></tr>
-        <tr><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」动态抓取五个技术方向的公开岗位并可批量入库；JD 增删改、自动分段、技能标签、设为当前目标；支持上传 .docx / PDF / 截图识别；每张卡片带<strong>「一键投递」</strong>，按未投 / 已投筛选，并新增<strong>「行业」筛选行</strong>（自动归类 + 手动指定）</td></tr>
+        <tr><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」动态抓取六个技术方向的公开岗位，卡片式列表（右侧高亮 + 标签 + 公司行），点开是职位详情（职位信息 / 公司信息），可批量入库；JD 增删改、自动分段、技能标签、设为当前目标；支持上传 .docx / PDF / 截图识别；每张卡片带<strong>「一键投递」</strong>，按未投 / 已投筛选，并新增<strong>「行业」筛选行</strong>（自动归类 + 手动指定）</td></tr>
         <tr><td><strong>简历库</strong></td><td>我手里有哪些版本</td><td>多份简历、逐段编辑、一键复制全文；支持上传 .docx / PDF / 截图并自动拆字段</td></tr>
         <tr><td><strong>匹配分析</strong></td><td>差多少、差在哪</td><td>匹配分环形图、技能覆盖、ATS 六项、缺口清单、一键按岗位改写简历</td></tr>
         <tr><td><strong>定制改写</strong></td><td>这句话该怎么写</td><td>逐条 before/after 对照，采纳后生成定制版</td></tr>
@@ -247,6 +247,25 @@ flowchart LR
   <div class="callout">
     <b>公告类条目没有逐条 JD：</b>抓来的是校招公告，标题往往是招聘方向而不是具体职位，也没有正文要求。所以公告加入后会直接进入「补 JD」向导：能直连抓到的自动填好，抓不到的点「打开原文」粘贴正文，两栏立刻拆好，核对后保存即可用于匹配分析——不做这一步，匹配分只会反映职位名称的重合。<br>
     <b>断网或抓取失败时：</b>面板回落到 10 条内置示例（标题带「示例」，筛选与导入照样能演示），状态行写明失败原因，可再点一次重试；已有数据时刷新失败不会清空上一次结果。
+  </div>
+
+  <h3>岗位雷达：卡片式列表 + 点击看详情</h3>
+  <p>列表改成招聘站的卡片结构：<strong>岗位名 + 右侧高亮</strong>，第二行是地点 / 批次 / 学历 / 关键词标签，底部公司行（首字 logo + 公司名 + 企业类型 + 方向 + 发布日期），右侧「加入 / 原文 / 查看详情 →」。整张卡片可点，点开是职位详情弹窗；勾选框、「加入」、「原文」各自独立，不会误触。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:18%">环节</th><th>口径</th></tr></thead>
+      <tbody>
+        <tr><td><strong>右侧高亮</strong></td><td>有截止日期就显示「截止 MM-DD」，没有就显示招聘批次（如「2027届 · 秋招专场」）。<strong>雷达源里没有薪资字段，这里就不放薪资</strong>——不拿估算数字占住招聘站那个位置。</td></tr>
+        <tr><td><strong>标签去重</strong></td><td>同一信息只出现一次：批次已经在右侧高亮，就不再重复成标签；行业标签与公司行重复时只留一处；标签与公司名截断到 20 字，长公告标题不会把一行撑开。</td></tr>
+        <tr><td><strong>点击查看详情</strong></td><td>整卡点击、或聚焦后按 Enter / 空格，打开 780px 详情弹窗：标题 + 右侧高亮、图标化的 meta 行（公司 / 招聘对象 / 学历 / 截止）、左栏「职位信息」8 项事实与说明、右栏「公司信息」卡（logo、企业类型、所属行业、城市、岗位方向）与关键词；动作区是「加入岗位库 / 打开公告原文 / 关闭」。</td></tr>
+        <tr><td><strong>与加入联动</strong></td><td>未入库：详情里点「加入岗位库」→ 写入岗位库并直接进入「补 JD」向导（公告类），或打开刚建好的岗位详情（示例类）；已入库：详情按钮变成「查看已入库岗位」，直接跳到那条记录，不重复写入。</td></tr>
+        <tr><td><strong>职责 / 要求的说明</strong></td><td>公告类条目在左栏明确写「原公告只写招聘项目与专业方向，没有逐条职位描述」，并指向「补 JD」向导；不把公告标题伪装成岗位职责。</td></tr>
+        <tr><td><strong>响应式</strong></td><td>≤900px 详情弹窗改单列、卡片隐藏「查看详情 →」；456px 手机视口下卡片 359px、详情弹窗 428px，弹窗内部滚动 0、页面横向溢出 0。</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <b>为什么不像招聘站那样写薪资：</b>雷达抓的是校招公告，原公告不写薪资；这个位置改放「截止 / 批次」，既保持卡片的信息层级，也不编造一个看起来很像真的数字。真要薪资，加入岗位库后在岗位表单里自己填，匹配分析与投递素材用的都是你填的这份。
   </div>
 
   <h3>岗位库：一键投递，直达官网岗位页</h3>
@@ -433,7 +452,7 @@ flowchart LR
         <tr><td>7</td><td>反问清单与复制</td><td><span class="tag ok">PASS</span></td><td>六组卡片与「别这样问」清单存在；复制失败时给出明确提示</td></tr>
         <tr><td>8</td><td>设置页与提示词工坊</td><td><span class="tag ok">PASS</span></td><td>8 条提示词可生成，弹窗文本框内容完整</td></tr>
         <tr><td>9</td><td>控制台</td><td><span class="tag ok">PASS</span></td><td>全程 0 条 error 级消息（favicon 已内联，无 404）</td></tr>
-        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：253,472 字符，1 个 script 块（整份 HTML 318,641 字符 / 361,696 字节）</td></tr>
+        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：258,178 字符，1 个 script 块（整份 HTML 326,930 字符 / 370,642 字节）</td></tr>
         <tr><td>11</td><td>JD 上传 .docx</td><td><span class="tag ok">PASS</span></td><td>中文标题、岗位职责、任职要求完整提取；预览确认后填入</td></tr>
         <tr><td>12</td><td>简历上传 .docx</td><td><span class="tag ok">PASS</span></td><td>简历弹窗同一解析器可用，填入后可继续点「回填到上方各栏」</td></tr>
         <tr><td>13</td><td>上传含文字层 PDF</td><td><span class="tag ok">PASS</span></td><td>11 行简历文本逐行提取，未触发乱码告警</td></tr>
@@ -475,6 +494,8 @@ flowchart LR
         <tr><td>49</td><td>投递入口与表单联动</td><td><span class="tag ok">PASS</span></td><td>岗位详情新增「投递」区块：有链接时显示入口与最近 4 次记录、提供「一键投递 / 复制投递素材」，无链接时多一个「搜官网」；在详情里点投递，记录从 2 条增至 3 条并打开官网。新建弹窗存在 <code>#jf-url</code>，状态选项为「在投 / 已投递 / 面试中 / 已offer / 已挂」；粘贴含链接的 JD 后回填自动填入 <code>https://careers.example.com/jobs/888</code>（去掉句末「。」），保存后 <code>url</code> 落库。手机 456px 下岗位库横向溢出 <code>-14</code>、详情弹窗 435px 且内部滚动 0，控制台 0 error</td></tr>
         <tr><td>50</td><td>行业 chip 计数与筛选</td><td><span class="tag ok">PASS</span></td><td>5 个不同行业岗位下 chips 为「全部行业 5 / 互联网/软件 2 / 汽车 1 / 医药/医疗 1 / 消费/零售 1」；点「汽车」只剩「整车电子工程师」、点「医药/医疗」只剩「临床数据专员」、点「全部行业」恢复 5 条；叠加「已投递」后标记一辆车投递，已投 + 汽车命中 1 条并显示「已投 10-23」徽章；「未投递」下行业计数变为 4 条且汽车显示 0；搜索「医药」时行业行只保留「全部行业 1 / 金融 1」；空态出现「「医药/医疗」下没有岗位」与「查看全部行业」按钮，点击后回全部行业；控制台 0 error</td></tr>
         <tr><td>51</td><td>行业归类与手动指定</td><td><span class="tag ok">PASS</span></td><td>新建岗位不选行业、JD 含「SoC 芯片 / Verilog / UVM」时自动归入「电子/半导体」，库里 <code>industry=""</code>（保留自动判断）；编辑时把「恒瑞医药」的岗位手动改为「金融」，保存后 <code>industry=金融</code>、chip 行同步出现「金融 1」且「医药/医疗」消失；详情副标题显示「恒瑞医药 · 上海 · 20-30K · 金融」；弹窗「自动判断（…）」提示随公司名 / JD 输入实时更新为「电子/半导体」，手动选中后不会被输入覆盖；手机 456px 下 chip 行宽 416px、换行不溢出（<code>overflowX=0</code>）</td></tr>
+        <tr><td>52</td><td>雷达卡片改版（对齐招聘站列表）</td><td><span class="tag ok">PASS</span></td><td>1280px 下 60 张卡片：标题 15px / 800、右侧红色高亮、标签 11.5px 圆角、公司行含 22px 首字 logo；同一信息只出现一次（批次已在高亮位就不再重复成标签，行业与公司行重复时只留一处）；右侧「加入 / 原文」同一行、「查看详情 →」在下方；列表在 430px 内滚动，页面 <code>overflowX=0</code>；已在库条目显示「已在库」徽章且不再出现「加入」按钮</td></tr>
+        <tr><td>53</td><td>点击卡片查看岗位详情</td><td><span class="tag ok">PASS</span></td><td>点卡片打开 780px 弹窗：标题 + 高亮、图标 meta 行、左栏「职位信息」8 项事实、右栏「公司信息」卡与关键词；点勾选框 / 「原文」不触发弹窗（overlay 数保持 0），聚焦后按 Enter 可打开；未入库详情点「加入岗位库」→ 岗位数 +1、详情关闭并弹出「补 JD」向导；已入库条目按钮变为「查看已入库岗位」，点击后打开该岗位详情（标题一致）；示例条目无原文链接、标题带「示例」；≤900px 详情单列，456px 下弹窗 428px、内部滚动 0</td></tr>
       </tbody>
     </table>
   </div>
@@ -553,7 +574,7 @@ flowchart LR
 </main>
 
 <footer>
-  <b>求职作战室 v1.3</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
+  <b>求职作战室 v1.4</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
   交付物：<span class="mono">jobseeker-workbench/jobseeker-workbench.html</span> + <span class="mono">assets/greet-banner.jpg</span> · 本报告：<span class="mono">jobseeker-report/jobseeker-report.html</span>
 </footer>
 

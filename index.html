@@ -1022,6 +1022,7 @@ const store = {
 let data = store.load();
 let view = "home";
 let searchQ = "";
+let jobFilter = "all";   // 岗位库筛选：all / todo(未投递) / applied(已投递)
 let pomo = { running:false, remain:25*60, total:25*60 };   // 番茄钟状态（内存态，跨渲染保留）
 let clockTimer = null;                                       // 全局秒级心跳（时钟 + 番茄钟）
 function persist(){ store.save(); render(); }
@@ -2964,17 +2965,27 @@ function jdwDone(ov, done){
   toast(done?`补 JD 完成：${done} 条`:(left?`还剩 ${left} 条待补`:"补 JD 已完成"));
 }
 
+function isApplied(j){ return !!(j && (j.appliedAt || (j.applyLog && j.applyLog.length))); }
 function renderJobs(){
   const all=data.jobs||[]; const q=searchQ.trim().toLowerCase();
-  const list=q? all.filter(j=>(j.title+j.company+(j.jd||"")).toLowerCase().includes(q)):all;
+  const kq=q? all.filter(j=>(j.title+j.company+(j.jd||"")).toLowerCase().includes(q)):all;
+  const list=kq.filter(j=> jobFilter==="all" ? true : jobFilter==="applied" ? isApplied(j) : !isApplied(j));
+  const appliedN=all.filter(isApplied).length;
   const res=activeResume();
   $("#screen").innerHTML = headHTML("岗位库","每份 JD 都会被拆成结构化要求，作为简历改写的唯一依据",
       `<span class="badge">${all.length} 个岗位</span><button class="btn sm" id="btn-job-new" style="margin-left:10px">${icon("plus",15,2.4)} 新建岗位</button>`)
     + `<div class="toolbar"><div class="search-box">${icon("search",15,2.2)}<input id="job-search" placeholder="搜索岗位 / 公司 / JD 关键词" value="${attr(searchQ)}"/></div>
         <div class="spacer"></div><span class="tiny">当前简历：${res?esc(res.name):"未选择"}</span></div>`
+    + `<div class="chips mt10" id="job-filter">
+        <span class="chip click ${jobFilter==="all"?"on":""}" data-jf="all">全部 ${all.length}</span>
+        <span class="chip click ${jobFilter==="todo"?"on":""}" data-jf="todo">未投递 ${all.length-appliedN}</span>
+        <span class="chip click ${jobFilter==="applied"?"on":""}" data-jf="applied">已投递 ${appliedN}</span>
+      </div>`
     + `<div class="panel-lg radar-panel" id="radar">${radarPanelHTML()}</div>`
     + (list.length? `<div class="job-list">${list.map(j=>jobCardHTML(j,res)).join("")}</div>`
-      : emptyState("briefcase","还没有岗位","新建一个岗位，粘贴 JD 后即可开始匹配诊断。","新建岗位","new-job"));
+      : emptyState("briefcase",jobFilter==="applied"?"还没有投递记录":"没有符合条件的岗位",
+          jobFilter==="applied"?"点岗位卡片上的「一键投递」，打开官网后会自动记一笔。":"新建一个岗位，粘贴 JD 后即可开始匹配诊断。",
+          jobFilter==="applied"?"查看全部岗位":"新建岗位", jobFilter==="applied"?"jf-all":"new-job"));
   wireJobs();
   if(!RADAR.online.length && !RADAR.loading && !RADAR.tried && navigator.onLine!==false){
     RADAR.tried=true; radarFetch(true);
@@ -2984,15 +2995,18 @@ function jobCardHTML(j,res){
   const m=res?runMatch(j.id,res.id):null;
   const p=j.parsed||parseJD(j.jd||"");
   const pend=jobNeedsJd(j);
+  const applied=isApplied(j);
   return `<div class="job-card" data-job="${j.id}">
     <div class="jh"><span class="logo">${icon("building",19)}</span>
       <div class="grow"><div class="jt">${esc(j.title)}</div><div class="jc">${esc(j.company)} · ${esc(j.location||"地点未填")}</div></div>
       ${j.id===data.activeJobId?'<span class="badge ok">当前</span>':""}
-      ${pend?'<span class="badge warn">待补 JD</span>':""}</div>
+      ${pend?'<span class="badge warn">待补 JD</span>':""}
+      ${applied?`<span class="badge ok">已投 ${esc(String(j.appliedAt||"").slice(5,10))}</span>`:""}</div>
     <div class="jm"><span>${icon("wallet",13)} ${esc(j.salary||"面议")}</span><span>${icon("clock",13)} ${esc(j.channel||"渠道未填")}</span><span>${icon("alert",13)} ${p.must.length} 条硬性要求</span></div>
     <div class="jf"><span class="score" style="color:${m?(m.score>=75?'var(--success)':m.score>=60?'var(--warning)':'var(--danger)'):'var(--text-tertiary)'}">${m?m.score:"—"}<small>分</small></span>
       <span class="badge">${esc(j.status||"在投")}</span><div class="spacer" style="flex:1"></div>
       ${pend?`<span class="btn line sm js-jd-fill" data-id="${j.id}" style="height:26px;padding:0 9px">${icon("file",13)} 补 JD</span>`:""}
+      <span class="btn line sm js-apply" data-id="${j.id}" style="height:26px;padding:0 9px">${icon("send",13)} ${applied?"再投一次":"一键投递"}</span>
       <span class="tiny">${m?`覆盖 ${Math.round(m.coverage*100)}%`:"未匹配"}</span>
       <span class="iconbtn js-job-edit" data-id="${j.id}" style="width:28px;height:28px">${icon("pen",14)}</span></div></div>`;
 }
@@ -3012,6 +3026,124 @@ function wireJobs(){
   $("#screen").querySelectorAll(".js-jd-fill").forEach(el=>el.onclick=e=>{
     e.stopPropagation(); openJdWizard([el.dataset.id]);
   });
+  $("#screen").querySelectorAll(".js-apply").forEach(el=>el.onclick=e=>{
+    e.stopPropagation(); oneClickApply(el.dataset.id);
+  });
+  $("#screen").querySelectorAll("#job-filter .chip").forEach(el=>el.onclick=()=>{
+    jobFilter=el.dataset.jf; renderJobs();
+  });
+}
+/* ---------------- 一键投递 ----------------
+   单文件网页无法代替你在官网上提交（跨域 + 需要登录），所以这里做的是：
+   1) 尽最大可能在本地找出「官网 / 公告原文」链接，一次点击直接打开；
+   2) 没有链接时给出填写链接、按公司+岗位搜索、复制投递素材三条出路；
+   3) 无论走哪条，都记一笔投递时间与入口，岗位库可按「已投递」筛。
+*/
+const APPLY_URL_RE=/https?:\/\/[^\s"'<>()（）【】\]]+/i;
+function applyLinkOf(j){
+  const list=[["官网链接",j.url],["公告原文",j.srcUrl],["公告原文",j.applyUrl]];
+  for(const [kind,v] of list){
+    const s=String(v||"").trim();
+    if(/^https?:\/\//i.test(s)) return {url:s, kind};
+  }
+  const m=String((j&&j.jd)||"").match(APPLY_URL_RE);
+  if(m) return {url:m[0].replace(/[.,;，。；、]+$/,""), kind:"JD 里的链接"};
+  return null;
+}
+function applySearchURL(j){
+  const q=[j.company,j.title,"官网","招聘","投递"].filter(Boolean).join(" ");
+  return "https://cn.bing.com/search?q="+encodeURIComponent(q);
+}
+function applyMaterial(j){
+  const res=activeResume();
+  const m=res?runMatch(j.id,res.id):null;
+  const p=j.parsed||parseJD(j.jd||"");
+  const cover=m?`匹配分 ${m.score} / 要求覆盖 ${Math.round(m.coverage*100)}%`:"尚未做匹配分析";
+  const hit=(m&&m.matchedSkills&&m.matchedSkills.length)?m.matchedSkills.slice(0,6).join("、"):(p.skills||[]).slice(0,6).join("、");
+  return [
+    `【投递素材】${j.company||"未填公司"} · ${j.title||"未填岗位"}`,
+    `${cover}${hit?`｜匹配点：${hit}`:""}`,
+    res&&res.summary?`个人简介：${res.summary}`:"",
+    `投递时间：${new Date().toLocaleString("zh-CN")}`,
+    "（粘贴到官网表单的「自我评价 / 备注」栏；数字与事实以简历原文为准）",
+  ].filter(Boolean).join("\n");
+}
+function markApplied(j, url, method){
+  j.applyLog=j.applyLog||[];
+  j.applyLog.unshift({at:nowISO(), url:url||"", method:method||"官网"});
+  j.applyLog=j.applyLog.slice(0,20);
+  j.appliedAt=j.applyLog[0].at;
+  j.applyUrl=url||"";
+  j.applyMethod=method||"官网";
+  j.status="已投递";
+  store.save();
+}
+function openApplyModal(j){
+  const target=applyLinkOf(j);
+  const search=applySearchURL(j);
+  const ov=openModal(`<h3>投递「${esc(j.title)}」</h3>
+    <div class="sub">${esc(j.company||"未填公司")}${j.location?" · "+esc(j.location):""} · 岗位库没有收录官网链接，选一条路继续</div>
+    <div class="field"><label>官网 / 投递页链接</label>
+      <input id="ap-url" value="${attr(j.url||"")}" placeholder="https://公司官网/careers/岗位ID"/>
+      <div class="tiny" style="margin-top:6px">粘贴招聘官网或公告页地址，保存后这个岗位以后就是「一键直达」。</div></div>
+    <div class="field-row">
+      <button class="btn line sm" id="ap-save">${icon("send",14)} 保存并打开</button>
+      <button class="btn line sm" id="ap-search">${icon("search",14)} 按公司 + 岗位搜索</button>
+      <button class="btn line sm" id="ap-copy">${icon("file",14)} 复制投递素材</button>
+    </div>
+    <div class="note-line tiny">搜索是用必应打开「公司 + 岗位 + 官网 + 投递」，结果里认准公司自有域名（如 careers.xxx.com / xxx.com/jobs），别在第三方页面填身份证号。</div>
+    <div class="modal-actions"><div class="spacer"></div><button class="btn ghost" id="ap-cancel">关闭</button></div>`, true);
+  const done=(url,method)=>{
+    markApplied(j, url, method);
+    ov.remove(); render();
+  };
+  ov.querySelector("#ap-save").onclick=()=>{
+    const v=ov.querySelector("#ap-url").value.trim();
+    if(!/^https?:\/\//i.test(v)){ toast("链接要以 http:// 或 https:// 开头"); return; }
+    if(!confirm("确认这个链接是公司自有招聘页？打开后请在官网完成投递。")) return;
+    window.open(v,"_blank","noopener,noreferrer");
+    j.url=v; done(v,"官网");
+    toast("已打开官网，投递完成后回来记一笔");
+  };
+  ov.querySelector("#ap-search").onclick=()=>{
+    window.open(search,"_blank","noopener,noreferrer");
+    done("","搜索");
+    toast("已打开搜索结果，认准公司自有域名再投");
+  };
+  ov.querySelector("#ap-copy").onclick=()=>copyText(applyMaterial(j));
+  ov.querySelector("#ap-cancel").onclick=()=>ov.remove();
+}
+function oneClickApply(id){
+  const j=getJob(id); if(!j) return;
+  const target=applyLinkOf(j);
+  if(!target){ openApplyModal(j); return; }
+  if(target.kind==="公告原文" && !j.url){
+    // 公告页不一定有逐条岗位，先让用户确认再打开，避免以为已投递
+    const ov=openModal(`<h3>打开公告原文投递</h3>
+      <div class="sub">${esc(j.company)} · ${esc(j.title)}</div>
+      <div class="note-line">这条岗位来自公开校招公告，链接是<strong>公告页</strong>而不是岗位详情页。公告页里通常有网申入口或投递邮箱，打开后按页面指引投递。</div>
+      <div class="pane" style="word-break:break-all;font-size:12px">${esc(target.url)}</div>
+      <div class="field mt12"><label>如果已经拿到岗位详情页，可粘在这里（下次就能直达）</label>
+        <input id="ap-url2" value="${attr(j.url||"")}" placeholder="https://..."/></div>
+      <div class="modal-actions"><div class="spacer"></div><button class="btn ghost" id="ap2-cancel">取消</button>
+        <button class="btn" id="ap2-open">${icon("send",15)} 打开并记为已投</button></div>`, true);
+    ov.querySelector("#ap2-cancel").onclick=()=>ov.remove();
+    ov.querySelector("#ap2-open").onclick=()=>{
+      const v=ov.querySelector("#ap-url2").value.trim();
+      const url=/^https?:\/\//i.test(v)?v:target.url;
+      if(/^https?:\/\//i.test(v)) j.url=v;
+      window.open(url,"_blank","noopener,noreferrer");
+      markApplied(j, url, j.url?"官网":"公告原文");
+      ov.remove(); render();
+      toast("已打开投递页，并按「已投递」记了一笔");
+    };
+    return;
+  }
+  if(!confirm(`打开「${j.company}」官网投递页？\n${target.url}`)) return;
+  window.open(target.url,"_blank","noopener,noreferrer");
+  markApplied(j, target.url, target.kind);
+  render();
+  toast(`已打开${target.kind}，投递完成后可在详情里补记录`);
 }
 function openJobForm(job){
   const d=job||{title:"",company:"",location:"",salary:"",channel:"",deadline:"",status:"在投",jd:""};
@@ -3027,8 +3159,11 @@ function openJobForm(job){
       <div class="field"><label>薪资</label><input id="jf-salary" value="${attr(d.salary)}" placeholder="25-40K"/></div>
       <div class="field"><label>渠道</label><input id="jf-channel" value="${attr(d.channel)}" placeholder="内推 / BOSS"/></div>
       <div class="field"><label>截止日</label><input id="jf-deadline" type="date" value="${attr(d.deadline)}"/></div></div>
+    <div class="field"><label>官网 / 投递链接</label>
+      <input id="jf-url" value="${attr(d.url||"")}" placeholder="https://公司官网/careers/岗位ID"/>
+      <div class="tiny" style="margin-top:6px">填了就能在岗位卡片上一键直达投递页；留空时会在 JD 原文里找一个链接。</div></div>
     <div class="field"><label>状态</label><div class="seg" id="jf-status">
-      ${["在投","面试中","已offer","已挂"].map(s=>`<div class="opt ${s===(d.status||"在投")?'on':''}" data-v="${s}">${s}</div>`).join("")}</div></div>
+      ${["在投","已投递","面试中","已offer","已挂"].map(s=>`<div class="opt ${s===(d.status||"在投")?'on':''}" data-v="${s}">${s}</div>`).join("")}</div></div>
     <div class="field-row">
       <div class="field"><label>岗位职责</label><textarea id="jf-duty" style="min-height:118px;font-size:13px;line-height:1.7" placeholder="一行一条；粘贴 JD 后点下方「回填到上方各栏」会自动填入">${esc(dutyInit)}</textarea></div>
       <div class="field"><label>任职要求</label><textarea id="jf-must" style="min-height:118px;font-size:13px;line-height:1.7" placeholder="一行一条；含「优先 / 加分」的会归到加分项">${esc(mustInit)}</textarea></div>
@@ -3055,6 +3190,11 @@ function openJobForm(job){
     const text=ov.querySelector("#jf-jd").value;
     if(!text.trim()){ toast("先上传或粘贴 JD 文本"); return; }
     const r=autofillJob(text,ov);
+    const u=ov.querySelector("#jf-url");
+    if(u && !u.value.trim()){
+      const m=text.match(APPLY_URL_RE);
+      if(m){ u.value=m[0].replace(/[.,;，。；、]+$/,""); r.n++; }
+    }
     toast(r.n ? `已回填 ${r.n} 个空栏，请核对`
       : r.detected ? "没有空栏可填，已填内容不会被覆盖"
       : "没识别到岗位名称 / 地点 / 薪资，检查 JD 开头是否完整");
@@ -3076,6 +3216,7 @@ function openJobForm(job){
     const rec=job||{id:uid("j"),createdAt:nowISO()};
     Object.assign(rec,{title,company:val("#jf-company").trim()||"未填公司",location:val("#jf-loc").trim(),
       salary:val("#jf-salary").trim(),channel:val("#jf-channel").trim(),deadline:val("#jf-deadline"),
+      url:val("#jf-url").trim(),
       status:ov.querySelector("#jf-status .on")?.dataset.v||"在投",jd,parsed,updatedAt:nowISO()});
     if(!job) data.jobs.unshift(rec);
     data.activeJobId=rec.id; store.save(); ov.remove();
@@ -3085,12 +3226,27 @@ function openJobForm(job){
 function openJobDetail(id){
   const j=getJob(id); if(!j) return;
   const p=j.parsed||parseJD(j.jd||"");
+  const target=applyLinkOf(j), applied=isApplied(j), logs=(j.applyLog||[]).slice(0,4);
   const ov=openModal(`<h3>${esc(j.title)}</h3><div class="sub">${esc(j.company)} · ${esc(j.location||"未填")} · ${esc(j.salary||"面议")}</div>
     <div class="field-row three mt12">
       <div class="pane"><h5>${icon("briefcase",14)} 硬性要求</h5><div class="tiny">${p.must.length} 条</div></div>
       <div class="pane"><h5>${icon("spark",14)} 加分项</h5><div class="tiny">${p.nice.length} 条</div></div>
       <div class="pane"><h5>${icon("activity",14)} 职责</h5><div class="tiny">${p.duties.length} 条</div></div>
     </div>
+    <div class="field"><label>投递</label>
+      <div class="pane" style="padding:11px 12px">
+        <div class="tiny" style="margin-bottom:9px">${target
+          ? `${esc(target.kind)} · <span style="word-break:break-all">${esc(target.url)}</span>`
+          : "还没收录可直达的投递链接：可以现在填官网链接，或按「公司 + 岗位」去搜官网。"}</div>
+        <div class="chips" style="margin:0">
+          <span class="chip click" id="jd-apply">${icon("send",13)} ${applied?"再投一次":"一键投递"}</span>
+          <span class="chip click" id="jd-copy">${icon("copy",13)} 复制投递素材</span>
+          ${target?"":`<span class="chip click" id="jd-find">${icon("search",13)} 搜官网</span>`}
+        </div>
+        ${logs.length?`<div style="margin-top:10px;border-top:1px solid var(--border);padding-top:8px">${logs.map(l=>
+          `<div class="tiny" style="display:flex;gap:10px;padding:2px 0"><span style="font-family:var(--mono,monospace)">${esc(String(l.at||"").replace("T"," ").slice(0,16))}</span><span>${esc(l.method||"官网")}</span></div>`).join("")}</div>`:""}
+        <div class="tiny" style="margin-top:8px">一键投递只负责把官网投递页打开并记一笔，不会替你提交表单。</div>
+      </div></div>
     <div class="field"><label>技能关键词（自动提取）</label><div class="chips">${p.skills.length?p.skills.map(s=>`<span class="chip hit">${esc(s)}</span>`).join(""):'<span class="tiny">未识别到技能词</span>'}</div></div>
     <div class="field"><label>任职要求原文</label><div class="pane scroll" style="max-height:220px">${(p.must.length?p.must:["未解析到要求段落，请检查 JD 格式"]).map(t=>`<div style="font-size:12.5px;line-height:1.7;padding:4px 0;border-bottom:1px solid var(--border)">${esc(t)}</div>`).join("")}</div></div>
     <div class="field"><label>岗位职责</label><div class="pane scroll" style="max-height:180px">${p.duties.map(t=>`<div style="font-size:12.5px;line-height:1.7;padding:4px 0">· ${esc(t)}</div>`).join("")||'<span class="tiny">未识别</span>'}</div></div>
@@ -3099,6 +3255,10 @@ function openJobDetail(id){
       <button class="btn line" id="jd-set">设为当前岗位</button>
       <button class="btn" id="jd-go">去匹配分析</button></div>`, true);
   ov.querySelector("#jd-edit").onclick=()=>{ ov.remove(); openJobForm(j); };
+  ov.querySelector("#jd-apply").onclick=()=>{ ov.remove(); oneClickApply(j.id); };
+  ov.querySelector("#jd-copy").onclick=()=>copyText(applyMaterial(j));
+  const findBtn=ov.querySelector("#jd-find");
+  if(findBtn) findBtn.onclick=()=>window.open(applySearchURL(j),"_blank","noopener,noreferrer");
   ov.querySelector("#jd-set").onclick=()=>{ data.activeJobId=j.id; store.save(); ov.remove(); toast("已设为当前岗位"); render(); };
   ov.querySelector("#jd-go").onclick=()=>{ data.activeJobId=j.id; store.save(); ov.remove(); go("match"); };
   ov.querySelector("#jd-del").onclick=()=>{

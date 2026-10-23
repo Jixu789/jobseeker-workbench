@@ -2342,20 +2342,23 @@ const RADAR_SRC = {
   name:"校招公告雷达",
   url:"https://cdn.jsdelivr.net/gh/AdenXie/job-website@main/public/jobs.json",
 };
-const RADAR_DIRS = ["物联网","嵌入式","自动化","电子信息","计算机IT"];
+const RADAR_DIRS = ["物联网","嵌入式","自动化","电子信息","计算机IT","材料与化工"];
 const RADAR_DIR_RE = {
   "物联网":/物联网|iot|传感网|无线传感|智能家居|边缘计算|mqtt|rfid/i,
   "嵌入式":/嵌入式|单片机|mcu|stm32|rtos|固件|驱动开发|linux ?驱动|bsp/i,
   "自动化":/自动化(?!测试)|控制工程|plc|运动控制|伺服|机器人|dcs|仪器仪表|电气工程|电气自动化|机电一体化/i,
   "电子信息":/电子信息|硬件|电路|pcb|射频|微波|模拟ic|数字ic|芯片|半导体|fpga|通信|信号处理|光电子|天线/i,
   "计算机IT":/软件|开发|java|前端|后端|全栈|测试|运维|算法|大数据|云计算|网络安全|数据库|程序员|python|golang|c\+\+|web|android|ios|系统集成|it ?支持/i,
+  "材料与化工":/材料|化工|化学|高分子|催化|冶金|涂料|树脂|橡胶|塑料|复合材料|无机非金属|金属材料|锂电|电解液|正极|负极|隔膜|石化|炼化|石油化工|精细化工|工艺流程|工艺工程/i,
 };
-const RADAR_SEG_TECH=/工程师|研发|技术|开发|硬件|软件|算法|测试|设计|it|程序|数据|网络|电子|电路|嵌入式|单片机|自动化|电气|控制|机器人|通信|射频|芯片|半导体|fpga|物联网|传感|机械/i;
+const RADAR_SEG_TECH=/工程师|研发|技术|开发|硬件|软件|算法|测试|设计|it|程序|数据|网络|电子|电路|嵌入式|单片机|自动化|电气|控制|机器人|通信|射频|芯片|半导体|fpga|物联网|传感|机械|材料|化工|化学|高分子|催化|冶金|涂料|树脂|橡胶|塑料|锂电|电解液|石化|炼化|工艺/i;
 /* 行业兜底：只在标题已含技术词、但标题本身判不出方向时使用（避免「运营」被算成计算机 IT） */
 const RADAR_IND=[
+  ["材料与化工", /材料|化工|化学|高分子|催化|冶金|石化|炼化|新能源|电池/i],
   ["电子信息", /电子|通信|半导体|芯片|集成电路|硬件|仪器/i],
   ["计算机IT", /it|互联网|游戏|软件|计算机|信息/i],
 ];
+const RADAR_MAT_IND=/材料|化工|化学|高分子|催化|冶金|石化|炼化|新能源|电池/i;
 const RADAR_IND_GENERIC=/^(工程师|工程师类|技术|技术类|研发|研发类|其他|其他职位)$/;
 const RADAR_BRAND = /腾讯|字节|阿里|百度|美团|京东|华为|小米|网易|快手|滴滴|拼多多|蚂蚁|中兴|oppo|vivo|海康|大疆|浪潮|用友|金山|携程|微博|哔哩哔哩|b站|商汤|旷视|科大讯飞|比亚迪|宁德时代|联想|tcl|海尔|美的|格力|新华三|紫光|烽火|中芯|地平线|寒武纪|大华|汇顶|兆易|深信服|奇安信/i;
 const RADAR_STATE = /中国|国家|国网|电网|中电|中船|中核|中铁|中建|中车|中交|中冶|中化|中粮|中煤|中航|航天|航空|兵器|电科|中广核|华能|大唐|华电|国电|三峡|南网|移动|联通|电信|铁路|烟草|邮政|华润|招商局|保利|国投/i;
@@ -2381,6 +2384,8 @@ const RADAR_SEED = [
   ["FPGA 开发工程师","某通信研究所","成都","央企国企","电子信息",["FPGA","Verilog","信号处理"],"负责基带信号处理模块的 FPGA 实现与仿真验证。"],
   ["机器人算法工程师","某机器人公司","深圳","大厂","自动化",["ROS","SLAM","C++"],"负责移动机器人定位与路径规划算法开发，参与整机联调。"],
   ["单片机开发工程师","某电子厂","东莞","私企","嵌入式",["MCU","C 语言","串口通信"],"负责小家电控制板固件开发与外设驱动调试。"],
+  ["材料研发工程师","某新材料公司","宁波","私企","材料与化工",["高分子材料","复合材料","性能表征"],"负责高分子复合材料配方开发与性能表征，跟进中试放大与工艺验证。"],
+  ["化工工艺工程师","某精细化工企业","南京","私企","材料与化工",["精细化工","反应工艺","工艺安全"],"负责精细化工产品反应工艺开发与放大，处理现场工艺异常并做安全评估。"],
 ].map(([title,company,city,org,dir,tags,desc],i)=>({
   rid:"seed"+i, title, company:"示例 · "+company, city, org, dir, tags,
   desc:desc+"（内置示例，非真实在招）", demo:true, source:"内置示例", url:"",
@@ -2404,9 +2409,13 @@ function radarSegs(s){
   return String(s||"").split(/[、,，/｜|]+/).map(x=>x.trim()).filter(Boolean);
 }
 function radarDirOfSegs(tech, ind){
+  const industry=String(ind||"");
+  /* 行业写明材料 / 化工，且标题里也有材料/化工词 → 优先归「材料与化工」，
+     避免「半导体材料」「化工自动化」被电子信息 / 自动化先抢走 */
+  if(RADAR_MAT_IND.test(industry) && tech.some(s=>RADAR_DIR_RE["材料与化工"].test(s))) return "材料与化工";
   for(const d of RADAR_DIRS) if(tech.some(s=>RADAR_DIR_RE[d].test(s))) return d;
   if(!tech.length) return "";
-  for(const [d,re] of RADAR_IND) if(re.test(String(ind||""))) return d;
+  for(const [d,re] of RADAR_IND) if(re.test(industry)) return d;
   return "";
 }
 function radarTitleOf(tech, dir, ind){
@@ -2427,6 +2436,7 @@ function radarJdOf(it){
 function radarMapCampus(j){
   const company=radarStr(j.company,60);
   if(!company) return null;
+  if(/教师|老师|讲师|教研|辅导员/.test(String(j.title||""))) return null;   // 化学教师 / 教研岗不是材料化工岗位
   const tech=radarSegs(j.title).filter(s=>RADAR_SEG_TECH.test(s));
   if(!tech.length) return null;               // 纯「运营 / 销售 / 管培生」不进雷达
   const dir=radarDirOfSegs(tech, j.industry);
@@ -2518,7 +2528,7 @@ function radarPanelHTML(){
   const dirRow=`<div class="radar-frow"><b>方向</b>${chip("dir","全部","all")}${RADAR_DIRS.map(d=>chip("dir",d,d)).join("")}</div>`;
   const orgRow=`<div class="radar-frow"><b>企业</b>${chip("org","全部","all")}${["央企国企","大厂","私企","小公司"].map(o=>chip("org",o,o)).join("")}</div>`;
   return `<h4>${icon("target",16)} 岗位雷达 <span class="badge demo">动态抓取</span></h4>
-    <div class="ph-sub">按方向聚合计算机 IT / 电子信息 / 自动化 / 物联网 / 嵌入式的公开校招岗位，央企国企、大厂、私企、小公司都在范围里；勾选后批量写入岗位库，公告类加入后会自动进入「补 JD」向导，把原文里的职责 / 要求写进两栏。</div>
+    <div class="ph-sub">按方向聚合计算机 IT / 电子信息 / 自动化 / 物联网 / 嵌入式 / 材料与化工的公开校招岗位，央企国企、大厂、私企、小公司都在范围里；勾选后批量写入岗位库，公告类加入后会自动进入「补 JD」向导，把原文里的职责 / 要求写进两栏。</div>
     ${dirRow}${orgRow}
     <div class="radar-bar">
       <div class="search-box">${icon("search",15,2.2)}<input id="radar-q" placeholder="岗位 / 公司 / 关键词" value="${attr(RADAR.q)}"/></div>
@@ -2599,7 +2609,7 @@ async function radarFetch(auto){
       if(!it || seen.has(it.rid)) return;
       seen.add(it.rid); items.push(it);
     });
-    if(!items.length) throw new Error("源里没有匹配这五个方向的岗位");
+    if(!items.length) throw new Error("源里没有匹配这些方向的岗位");
     RADAR.online=items;
     RADAR.lastAt=items.reduce((a,x)=>x.date&&x.date>a?x.date:a, "")||(json&&json.generatedAt)||nowISO();
     RADAR.selected.clear();

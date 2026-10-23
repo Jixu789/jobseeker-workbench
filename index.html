@@ -1023,6 +1023,7 @@ let data = store.load();
 let view = "home";
 let searchQ = "";
 let jobFilter = "all";   // 岗位库筛选：all / todo(未投递) / applied(已投递)
+let indFilter = "all";   // 岗位库行业筛选：all / 行业名
 let pomo = { running:false, remain:25*60, total:25*60 };   // 番茄钟状态（内存态，跨渲染保留）
 let clockTimer = null;                                       // 全局秒级心跳（时钟 + 番茄钟）
 function persist(){ store.save(); render(); }
@@ -2966,11 +2967,44 @@ function jdwDone(ov, done){
 }
 
 function isApplied(j){ return !!(j && (j.appliedAt || (j.applyLog && j.applyLog.length))); }
+/* ---------------- 行业归类 ----------------
+   雷达加入的岗位带公告源的行业字段（如「IT/互联网/游戏」），手动建的岗位没有。
+   统一走这里：先看原始行业标签，再看公司 / 岗位 / JD 里的关键词，最后归「其他」。 */
+const IND_OTHER="其他";
+const INDUSTRY_RULES=[
+  ["互联网/软件",/互联网|软件|电商|云计算|SaaS|游戏|社交|平台|人工智能|大数据|信息技术|计算机|\bIT\b/i],
+  ["电子/半导体",/半导体|芯片|集成电路|电子|元器件|光电|光学|PCB|硬件/i],
+  ["通信",/通信|运营商|5G|网络设备|光通信|华为|中兴/i],
+  ["汽车",/汽车|整车|车载|自动驾驶|新能源车|主机厂/i],
+  ["制造/机械",/制造|机械|装备|重工|工业|机床|机器人|精密|自动化/i],
+  ["能源/化工",/能源|电力|电网|石化|化工|材料|新能源|电池|光伏|风电|环保|冶金/i],
+  ["医药/医疗",/医药|医疗|生物|制药|器械|医院|健康|基因/i],
+  ["金融",/金融|银行|证券|保险|基金|支付|资管|风控/i],
+  ["教育",/教育|学校|培训|院校|学院|教师/i],
+  ["建筑/地产",/建筑|地产|房地产|工程|设计院|施工|物业|建材/i],
+  ["消费/零售",/消费品|零售|快消|食品|饮料|日化|服装|门店|餐饮/i],
+  ["交通/物流",/物流|运输|航空|铁路|快递|供应链|仓储/i],
+  ["咨询/服务",/咨询|会计|审计|律所|人力|外包|专业服务|广告|传媒/i],
+];
+function industryOf(j){
+  if(!j) return IND_OTHER;
+  const raw=String(j.industry||"");
+  if(raw===IND_OTHER) return IND_OTHER;   // 手动选过「其他」就不要再被关键词改判
+  for(const [name,re] of INDUSTRY_RULES) if(re.test(raw)) return name;
+  if(raw && !INDUSTRY_RULES.some(([,re])=>re.test(raw))) return raw.slice(0,12);
+  const scope=`${j.company||""} ${j.title||""} ${String(j.jd||"").slice(0,400)}`;
+  for(const [name,re] of INDUSTRY_RULES) if(re.test(scope)) return name;
+  return IND_OTHER;
+}
 function renderJobs(){
   const all=data.jobs||[]; const q=searchQ.trim().toLowerCase();
   const kq=q? all.filter(j=>(j.title+j.company+(j.jd||"")).toLowerCase().includes(q)):all;
-  const list=kq.filter(j=> jobFilter==="all" ? true : jobFilter==="applied" ? isApplied(j) : !isApplied(j));
+  const base=kq.filter(j=> jobFilter==="all" ? true : jobFilter==="applied" ? isApplied(j) : !isApplied(j));
+  const list=base.filter(j=> indFilter==="all" || industryOf(j)===indFilter);
   const appliedN=all.filter(isApplied).length;
+  const indCounts={}; base.forEach(j=>{ const k=industryOf(j); indCounts[k]=(indCounts[k]||0)+1; });
+  const indNames=[...new Set(kq.map(industryOf))].sort((a,b)=>(indCounts[b]||0)-(indCounts[a]||0));
+  if(indFilter!=="all" && !indNames.includes(indFilter)) indNames.push(indFilter);
   const res=activeResume();
   $("#screen").innerHTML = headHTML("岗位库","每份 JD 都会被拆成结构化要求，作为简历改写的唯一依据",
       `<span class="badge">${all.length} 个岗位</span><button class="btn sm" id="btn-job-new" style="margin-left:10px">${icon("plus",15,2.4)} 新建岗位</button>`)
@@ -2981,11 +3015,16 @@ function renderJobs(){
         <span class="chip click ${jobFilter==="todo"?"on":""}" data-jf="todo">未投递 ${all.length-appliedN}</span>
         <span class="chip click ${jobFilter==="applied"?"on":""}" data-jf="applied">已投递 ${appliedN}</span>
       </div>`
+    + `<div class="chips mt8" id="ind-filter">
+        <span class="chip click ${indFilter==="all"?"on":""}" data-ind="all">全部行业 ${base.length}</span>
+        ${indNames.map(n=>`<span class="chip click ${indFilter===n?"on":""}" data-ind="${attr(n)}">${esc(n)} ${indCounts[n]||0}</span>`).join("")}
+      </div>`
     + `<div class="panel-lg radar-panel" id="radar">${radarPanelHTML()}</div>`
     + (list.length? `<div class="job-list">${list.map(j=>jobCardHTML(j,res)).join("")}</div>`
-      : emptyState("briefcase",jobFilter==="applied"?"还没有投递记录":"没有符合条件的岗位",
-          jobFilter==="applied"?"点岗位卡片上的「一键投递」，打开官网后会自动记一笔。":"新建一个岗位，粘贴 JD 后即可开始匹配诊断。",
-          jobFilter==="applied"?"查看全部岗位":"新建岗位", jobFilter==="applied"?"jf-all":"new-job"));
+      : emptyState("briefcase", indFilter!=="all" ? `「${indFilter}」下没有岗位` : (jobFilter==="applied"?"还没有投递记录":"没有符合条件的岗位"),
+          indFilter!=="all" ? "换一个行业，或点「全部行业」看所有岗位。" : (jobFilter==="applied"?"点岗位卡片上的「一键投递」，打开官网后会自动记一笔。":"新建一个岗位，粘贴 JD 后即可开始匹配诊断。"),
+          indFilter!=="all" ? "查看全部行业" : (jobFilter==="applied"?"查看全部岗位":"新建岗位"),
+          indFilter!=="all" ? "ind-all" : (jobFilter==="applied"?"jf-all":"new-job")));
   wireJobs();
   if(!RADAR.online.length && !RADAR.loading && !RADAR.tried && navigator.onLine!==false){
     RADAR.tried=true; radarFetch(true);
@@ -3002,7 +3041,7 @@ function jobCardHTML(j,res){
       ${j.id===data.activeJobId?'<span class="badge ok">当前</span>':""}
       ${pend?'<span class="badge warn">待补 JD</span>':""}
       ${applied?`<span class="badge ok">已投 ${esc(String(j.appliedAt||"").slice(5,10))}</span>`:""}</div>
-    <div class="jm"><span>${icon("wallet",13)} ${esc(j.salary||"面议")}</span><span>${icon("clock",13)} ${esc(j.channel||"渠道未填")}</span><span>${icon("alert",13)} ${p.must.length} 条硬性要求</span></div>
+    <div class="jm"><span>${icon("wallet",13)} ${esc(j.salary||"面议")}</span><span>${icon("clock",13)} ${esc(j.channel||"渠道未填")}</span><span>${icon("grid",13)} ${esc(industryOf(j))}</span><span>${icon("alert",13)} ${p.must.length} 条硬性要求</span></div>
     <div class="jf"><span class="score" style="color:${m?(m.score>=75?'var(--success)':m.score>=60?'var(--warning)':'var(--danger)'):'var(--text-tertiary)'}">${m?m.score:"—"}<small>分</small></span>
       <span class="badge">${esc(j.status||"在投")}</span><div class="spacer" style="flex:1"></div>
       ${pend?`<span class="btn line sm js-jd-fill" data-id="${j.id}" style="height:26px;padding:0 9px">${icon("file",13)} 补 JD</span>`:""}
@@ -3031,6 +3070,12 @@ function wireJobs(){
   });
   $("#screen").querySelectorAll("#job-filter .chip").forEach(el=>el.onclick=()=>{
     jobFilter=el.dataset.jf; renderJobs();
+  });
+  $("#screen").querySelectorAll("#ind-filter .chip").forEach(el=>el.onclick=()=>{
+    indFilter=el.dataset.ind; renderJobs();
+  });
+  $("#screen").querySelectorAll("[data-act='ind-all']").forEach(el=>el.onclick=()=>{
+    indFilter="all"; renderJobs();
   });
 }
 /* ---------------- 一键投递 ----------------
@@ -3146,7 +3191,7 @@ function oneClickApply(id){
   toast(`已打开${target.kind}，投递完成后可在详情里补记录`);
 }
 function openJobForm(job){
-  const d=job||{title:"",company:"",location:"",salary:"",channel:"",deadline:"",status:"在投",jd:""};
+  const d=job||{title:"",company:"",location:"",salary:"",channel:"",deadline:"",status:"在投",industry:"",jd:""};
   const p=(job&&job.parsed)||(job&&job.jd?parseJD(job.jd):null);
   const dutyInit=p?p.duties.join("\n"):"";
   const mustInit=p?p.must.join("\n"):"";
@@ -3162,6 +3207,13 @@ function openJobForm(job){
     <div class="field"><label>官网 / 投递链接</label>
       <input id="jf-url" value="${attr(d.url||"")}" placeholder="https://公司官网/careers/岗位ID"/>
       <div class="tiny" style="margin-top:6px">填了就能在岗位卡片上一键直达投递页；留空时会在 JD 原文里找一个链接。</div></div>
+    <div class="field"><label>行业</label>
+      <select id="jf-ind">
+        <option value="">自动判断（${esc(industryOf(d))}）</option>
+        ${INDUSTRY_RULES.map(([n])=>`<option value="${attr(n)}" ${d.industry===n?"selected":""}>${esc(n)}</option>`).join("")}
+        <option value="${IND_OTHER}" ${d.industry===IND_OTHER?"selected":""}>${IND_OTHER}</option>
+      </select>
+      <div class="tiny" style="margin-top:6px">按公司 / 岗位 / JD 关键词自动归类；归错了可以在这里手动指定，岗位库顶部按行业筛选。</div></div>
     <div class="field"><label>状态</label><div class="seg" id="jf-status">
       ${["在投","已投递","面试中","已offer","已挂"].map(s=>`<div class="opt ${s===(d.status||"在投")?'on':''}" data-v="${s}">${s}</div>`).join("")}</div></div>
     <div class="field-row">
@@ -3180,6 +3232,9 @@ function openJobForm(job){
     <div class="modal-actions"><div class="spacer"></div><button class="btn ghost" id="jf-cancel">取消</button>
       <button class="btn" id="jf-save">${job?"保存":"解析并保存"}</button></div>`, true);
   ov.querySelectorAll(".seg .opt").forEach(o=>o.onclick=()=>{ ov.querySelectorAll(".seg .opt").forEach(x=>x.classList.remove("on")); o.classList.add("on"); });
+  const indSel=ov.querySelector("#jf-ind"), indAuto=indSel.options[0];
+  const refreshInd=()=>{ indAuto.textContent=`自动判断（${industryOf({industry:(job&&job.industry)||"",company:ov.querySelector("#jf-company").value,title:ov.querySelector("#jf-title").value,jd:ov.querySelector("#jf-jd").value})}）`; };
+  ["#jf-title","#jf-company","#jf-jd"].forEach(s=>ov.querySelector(s).addEventListener("input",refreshInd));
   ["#jf-duty","#jf-must"].forEach(s=>{
     const el=ov.querySelector(s); if(!el) return;
     if(el.value.trim()) el.dataset.auto=el.value;   // 记下自动解析值，方便重新回填时覆盖
@@ -3217,6 +3272,7 @@ function openJobForm(job){
     Object.assign(rec,{title,company:val("#jf-company").trim()||"未填公司",location:val("#jf-loc").trim(),
       salary:val("#jf-salary").trim(),channel:val("#jf-channel").trim(),deadline:val("#jf-deadline"),
       url:val("#jf-url").trim(),
+      industry:val("#jf-ind").trim()||(job&&job.industry)||"",
       status:ov.querySelector("#jf-status .on")?.dataset.v||"在投",jd,parsed,updatedAt:nowISO()});
     if(!job) data.jobs.unshift(rec);
     data.activeJobId=rec.id; store.save(); ov.remove();
@@ -3227,7 +3283,7 @@ function openJobDetail(id){
   const j=getJob(id); if(!j) return;
   const p=j.parsed||parseJD(j.jd||"");
   const target=applyLinkOf(j), applied=isApplied(j), logs=(j.applyLog||[]).slice(0,4);
-  const ov=openModal(`<h3>${esc(j.title)}</h3><div class="sub">${esc(j.company)} · ${esc(j.location||"未填")} · ${esc(j.salary||"面议")}</div>
+  const ov=openModal(`<h3>${esc(j.title)}</h3><div class="sub">${esc(j.company)} · ${esc(j.location||"未填")} · ${esc(j.salary||"面议")} · ${esc(industryOf(j))}</div>
     <div class="field-row three mt12">
       <div class="pane"><h5>${icon("briefcase",14)} 硬性要求</h5><div class="tiny">${p.must.length} 条</div></div>
       <div class="pane"><h5>${icon("spark",14)} 加分项</h5><div class="tiny">${p.nice.length} 条</div></div>

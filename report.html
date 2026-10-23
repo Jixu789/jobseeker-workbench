@@ -142,7 +142,7 @@
     <span>一个离线可用的求职工作台：把「岗位 JD + 个人简历」变成一份有针对性的简历、一场能练的模拟面试，以及一组真正加分的反问。</span>
   </h1>
   <div class="meta-line">
-    <span>版本 v1.2</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
+    <span>版本 v1.3</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
   </div>
 </header>
 
@@ -150,7 +150,7 @@
   <div class="metric"><b>10<em>个</em></b><span>导航入口，覆盖投递前到面试后</span></div>
   <div class="metric"><b>8<em>类</em></b><span>可复用 AI 提示词，支持提示词工坊</span></div>
   <div class="metric"><b>31<em>组</em></b><span>本地技能词典，无网络也能算匹配</span></div>
-  <div class="metric"><b>49<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
+  <div class="metric"><b>51<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
 </div>
 
 <main>
@@ -211,7 +211,7 @@ flowchart LR
       <tbody>
         <tr><td><strong>首页</strong></td><td>我现在该做什么</td><td>今日待办、当前岗位与简历、匹配分、下一步动作建议</td></tr>
         <tr><td><strong>求职流程</strong></td><td>整条路走到哪了</td><td>五步向导 + 进度指示灯，点击可直达对应视图</td></tr>
-        <tr><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」动态抓取五个技术方向的公开岗位并可批量入库；JD 增删改、自动分段、技能标签、设为当前目标；支持上传 .docx / PDF / 截图识别；每张卡片带<strong>「一键投递」</strong>，按未投 / 已投筛选</td></tr>
+        <tr><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」动态抓取五个技术方向的公开岗位并可批量入库；JD 增删改、自动分段、技能标签、设为当前目标；支持上传 .docx / PDF / 截图识别；每张卡片带<strong>「一键投递」</strong>，按未投 / 已投筛选，并新增<strong>「行业」筛选行</strong>（自动归类 + 手动指定）</td></tr>
         <tr><td><strong>简历库</strong></td><td>我手里有哪些版本</td><td>多份简历、逐段编辑、一键复制全文；支持上传 .docx / PDF / 截图并自动拆字段</td></tr>
         <tr><td><strong>匹配分析</strong></td><td>差多少、差在哪</td><td>匹配分环形图、技能覆盖、ATS 六项、缺口清单、一键按岗位改写简历</td></tr>
         <tr><td><strong>定制改写</strong></td><td>这句话该怎么写</td><td>逐条 before/after 对照，采纳后生成定制版</td></tr>
@@ -266,6 +266,23 @@ flowchart LR
   </div>
   <div class="callout">
     <b>为什么不做「自动提交」：</b>企业官网的投递表单需要登录态，且跨域请求会被浏览器拦截；能做的只有「把正确的页面打开在你面前」和「把投递这件事记下来」。所以这里把边界写在界面上：<strong>一键投递 = 打开官网投递页 + 记一笔</strong>，提交仍由你完成。
+  </div>
+
+  <h3>岗位库：新增「行业」筛选维度</h3>
+  <p>岗位一多，「未投 / 已投」就不够用了——同一批里既有芯片公司也有银行。岗位库顶部因此多了一行<strong>行业</strong>筛选，与原来的投递筛选<strong>叠加生效</strong>，行业 chip 上的数字是「当前投递筛选下的数量」。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:20%">环节</th><th>口径</th></tr></thead>
+      <tbody>
+        <tr><td><strong>行业来源</strong></td><td>岗位雷达加入的岗位自带公告源行业标签（如「IT/互联网/游戏」「能源/化工/环保」），先按标签归到 14 个行业大类之一；手动新建的岗位没有标签，就按<strong>公司名 / 岗位名 / JD 前 400 字</strong>里的关键词归类，都匹配不上才落到「其他」。原始标签认不出来时保留原文（截 12 字），不把来源信息抹平。</td></tr>
+        <tr><td><strong>筛选叠加</strong></td><td>先按「全部 / 未投递 / 已投递」过滤，再按行业过滤；chip 顺序按当前数量降序，计数随筛选实时变化。搜索框与行业筛选同时生效，切换投递筛选不会丢掉已选行业。</td></tr>
+        <tr><td><strong>手动纠正</strong></td><td>新建 / 编辑岗位弹窗新增「行业」下拉：默认「自动判断（当前会归到哪一类）」，输入公司名或 JD 时这行提示会跟着变；归错了可以直接指定 13 类之一或「其他」，保存后岗位库立即按新行业归档。卡片元信息与岗位详情副标题都会显示最终行业。</td></tr>
+        <tr><td><strong>空态</strong></td><td>选中的行业下没有岗位时，提示「「XX」下没有岗位」并给「查看全部行业」按钮，一键回到全部；不会出现「筛选后一片空白、不知道点哪退回」的情况。</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout blue">
+    <b>为什么用规则而不是模型：</b>行业归类只影响「怎么分组看岗位」，不影响匹配分。关键词规则离线可用、结果稳定、还能手动纠正；要让模型判断行业反而会引入不确定性和一次网络请求。
   </div>
 </section>
 
@@ -416,7 +433,7 @@ flowchart LR
         <tr><td>7</td><td>反问清单与复制</td><td><span class="tag ok">PASS</span></td><td>六组卡片与「别这样问」清单存在；复制失败时给出明确提示</td></tr>
         <tr><td>8</td><td>设置页与提示词工坊</td><td><span class="tag ok">PASS</span></td><td>8 条提示词可生成，弹窗文本框内容完整</td></tr>
         <tr><td>9</td><td>控制台</td><td><span class="tag ok">PASS</span></td><td>全程 0 条 error 级消息（favicon 已内联，无 404）</td></tr>
-        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：250,049 字符，1 个 script 块（整份 HTML 315,218 字符 / 357,304 字节）</td></tr>
+        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：253,472 字符，1 个 script 块（整份 HTML 318,641 字符 / 361,696 字节）</td></tr>
         <tr><td>11</td><td>JD 上传 .docx</td><td><span class="tag ok">PASS</span></td><td>中文标题、岗位职责、任职要求完整提取；预览确认后填入</td></tr>
         <tr><td>12</td><td>简历上传 .docx</td><td><span class="tag ok">PASS</span></td><td>简历弹窗同一解析器可用，填入后可继续点「回填到上方各栏」</td></tr>
         <tr><td>13</td><td>上传含文字层 PDF</td><td><span class="tag ok">PASS</span></td><td>11 行简历文本逐行提取，未触发乱码告警</td></tr>
@@ -456,6 +473,8 @@ flowchart LR
         <tr><td>47</td><td>一键投递：公告原文先确认</td><td><span class="tag ok">PASS</span></td><td>只有 <code>srcUrl</code>（校招公告页）时不直接跳走：弹窗说明「公告页里有网申入口或投递邮箱」并给出补详情页的输入框；点「打开并记为已投」前记录保持 <code>status=在投 / log=0</code>，点击后打开公告页、<code>applyMethod=公告原文</code>、<code>log=1</code></td></tr>
         <tr><td>48</td><td>一键投递：无链接与 JD 内链接</td><td><span class="tag ok">PASS</span></td><td>JD 正文里带链接时按「JD 里的链接」直接确认并打开（<code>applyUrl=https://jobs.example.com/a/77</code>）；三者都没有时弹出三条出路（填链接 / 必应搜索 / 复制投递素材），不写投递记录也不改状态，避免误以为已投</td></tr>
         <tr><td>49</td><td>投递入口与表单联动</td><td><span class="tag ok">PASS</span></td><td>岗位详情新增「投递」区块：有链接时显示入口与最近 4 次记录、提供「一键投递 / 复制投递素材」，无链接时多一个「搜官网」；在详情里点投递，记录从 2 条增至 3 条并打开官网。新建弹窗存在 <code>#jf-url</code>，状态选项为「在投 / 已投递 / 面试中 / 已offer / 已挂」；粘贴含链接的 JD 后回填自动填入 <code>https://careers.example.com/jobs/888</code>（去掉句末「。」），保存后 <code>url</code> 落库。手机 456px 下岗位库横向溢出 <code>-14</code>、详情弹窗 435px 且内部滚动 0，控制台 0 error</td></tr>
+        <tr><td>50</td><td>行业 chip 计数与筛选</td><td><span class="tag ok">PASS</span></td><td>5 个不同行业岗位下 chips 为「全部行业 5 / 互联网/软件 2 / 汽车 1 / 医药/医疗 1 / 消费/零售 1」；点「汽车」只剩「整车电子工程师」、点「医药/医疗」只剩「临床数据专员」、点「全部行业」恢复 5 条；叠加「已投递」后标记一辆车投递，已投 + 汽车命中 1 条并显示「已投 10-23」徽章；「未投递」下行业计数变为 4 条且汽车显示 0；搜索「医药」时行业行只保留「全部行业 1 / 金融 1」；空态出现「「医药/医疗」下没有岗位」与「查看全部行业」按钮，点击后回全部行业；控制台 0 error</td></tr>
+        <tr><td>51</td><td>行业归类与手动指定</td><td><span class="tag ok">PASS</span></td><td>新建岗位不选行业、JD 含「SoC 芯片 / Verilog / UVM」时自动归入「电子/半导体」，库里 <code>industry=""</code>（保留自动判断）；编辑时把「恒瑞医药」的岗位手动改为「金融」，保存后 <code>industry=金融</code>、chip 行同步出现「金融 1」且「医药/医疗」消失；详情副标题显示「恒瑞医药 · 上海 · 20-30K · 金融」；弹窗「自动判断（…）」提示随公司名 / JD 输入实时更新为「电子/半导体」，手动选中后不会被输入覆盖；手机 456px 下 chip 行宽 416px、换行不溢出（<code>overflowX=0</code>）</td></tr>
       </tbody>
     </table>
   </div>
@@ -534,7 +553,7 @@ flowchart LR
 </main>
 
 <footer>
-  <b>求职作战室 v1.2</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
+  <b>求职作战室 v1.3</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
   交付物：<span class="mono">jobseeker-workbench/jobseeker-workbench.html</span> + <span class="mono">assets/greet-banner.jpg</span> · 本报告：<span class="mono">jobseeker-report/jobseeker-report.html</span>
 </footer>
 

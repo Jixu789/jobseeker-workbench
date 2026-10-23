@@ -5,6 +5,9 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>求职作战室 · 简历改写与模拟面试</title>
+<meta name="robots" content="noindex,nofollow,noarchive" />
+<meta name="referrer" content="no-referrer" />
+<meta name="format-detection" content="telephone=no,email=no,address=no" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2334508c'/%3E%3Cpath d='M7 9h10M7 13h6' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   /* ============================================================
@@ -780,6 +783,67 @@
     100% { background:var(--surface-card); box-shadow:none; }
   }
 
+  /* ---------- 隐私 / 档案 ---------- */
+  .priv-list { display:grid; gap:0; margin-top:4px; }
+  .priv-row { display:grid; grid-template-columns:132px 1fr; gap:12px; padding:10px 0; border-bottom:1px solid var(--border); font-size:12.5px; line-height:1.65; }
+  .priv-row:last-child { border-bottom:none; }
+  .priv-row b { font-size:12.5px; font-weight:700; color:var(--text); }
+  .priv-row span { color:var(--text-secondary); }
+  .mtopbar { display:none; }
+  .scrim { display:none; }
+  .wxtip { position:fixed; left:12px; right:12px; bottom:12px; z-index:80; display:flex; align-items:flex-start; gap:12px;
+    padding:12px 14px; border-radius:12px; background:#1e2a45; color:#e8edf7; font-size:12px; line-height:1.6;
+    box-shadow:0 10px 30px rgba(0,0,0,.28); }
+  .wxtip button { flex:0 0 auto; background:transparent; border:1px solid rgba(232,237,247,.4); color:#e8edf7;
+    border-radius:8px; padding:3px 10px; font-size:11.5px; font-family:var(--font); cursor:pointer; }
+  .pw-hint { font-size:11.5px; color:var(--text-tertiary); line-height:1.6; margin-top:6px; }
+
+  /* ---------- 移动端（手机 / 微信内置浏览器） ---------- */
+  @media (max-width: 900px) {
+    body { min-width:0; }
+    .mtopbar { display:flex; position:fixed; top:0; left:0; right:0; height:52px; z-index:40; align-items:center; gap:8px;
+      padding:0 10px 0 6px; background:color-mix(in srgb, var(--surface-card) 94%, transparent);
+      backdrop-filter:blur(10px); border-bottom:1px solid var(--border); }
+    .mtopbar .mt-title { font-size:13.5px; font-weight:800; letter-spacing:-.01em; }
+    .mtopbar .mt-tag { margin-left:auto; font-size:10.5px; color:var(--text-tertiary); border:1px solid var(--border-input);
+      border-radius:999px; padding:2px 8px; white-space:nowrap; }
+    .sidebar { width:278px; transform:translateX(-100%); transition:transform .28s ease; z-index:50;
+      box-shadow:0 12px 44px rgba(0,0,0,.26); }
+    .sidebar.open { transform:none; }
+    .scrim { display:block; position:fixed; inset:0; z-index:45; background:rgba(18,24,38,.45);
+      opacity:0; pointer-events:none; transition:opacity .28s ease; }
+    .scrim.on { opacity:1; pointer-events:auto; }
+    .main { margin-left:0; padding:64px 13px 40px; }
+    .main > #screen { max-width:none; }
+    .g-4, .rings, .score-grid, .mod-summary, .kpi-row { grid-template-columns:repeat(2,minmax(0,1fr)); }
+    .g-3, .g-2, .g-main, .modcard-grid, .quick-grid, .pin-list, .job-list, .diff-row,
+    .field-row, .field-row.three, .split, .split.wide-left, .mod-layout, .ov2-body, .bento { grid-template-columns:1fr; }
+    .bento > * { grid-column:auto !important; grid-row:auto !important; }
+    .modal { width:auto; max-width:94vw; padding:20px 16px; border-radius:16px; }
+    .modal.modal-lg { width:auto; }
+    .field-row { margin-top:12px; }
+    .toolbar, .radar-bar { flex-wrap:wrap; }
+    .toolbar .search-box, .radar-bar .search-box { width:100%; flex:1 1 100%; }
+    .radar-bar select { flex:1 1 44%; }
+    .hero-banner { min-height:0; padding:22px 18px 20px; background-image:none; background-color:var(--surface-card); }
+    .hero-banner::before { content:none; }
+    .hero-banner .hi { font-size:24px; line-height:1.28; }
+    .hero-banner .sub { font-size:13px; max-width:none; }
+    .hero-banner .htop { position:static; margin-bottom:12px; flex-wrap:wrap; gap:8px; }
+    .hero-banner .hstats { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:16px; }
+    .hero-banner .hstat + .hstat { padding-left:0; border-left:none; }
+    .header h2 { font-size:23px; }
+    .ring .dial { max-width:104px; }
+    .ring .sub { text-align:center; line-height:1.4; }
+    .priv-row { grid-template-columns:1fr; gap:2px; }
+    .modal-actions { flex-wrap:wrap; }
+    .toast { left:12px; right:12px; width:auto; text-align:center; }
+  }
+  @media (max-width: 420px) {
+    .main { padding:60px 10px 36px; }
+    .modal { padding:18px 13px; }
+  }
+
   /* 打印 */
   @media print {
     .sidebar, .toolbar, .btn, .iconbtn, .stepbar, .composer, .chatbox, .toast, .print-hide { display:none !important; }
@@ -791,6 +855,14 @@
 </style>
 </head>
 <body>
+<div class="mtopbar" id="mtopbar">
+  <button class="iconbtn" id="mnav" aria-label="打开菜单" style="border:none;background:transparent">
+    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
+  <span class="mt-title">求职作战室</span>
+  <span class="mt-tag" id="mt-tag">本机存储</span>
+</div>
+<div class="scrim" id="scrim"></div>
 <div class="layout">
   <!-- sidebar -->
   <aside class="sidebar">
@@ -800,7 +872,7 @@
       <div><h1 id="brandName">我的工作台</h1><p id="brandSlogan">Personal Workbench</p></div>
     </div>
     <nav class="nav" id="nav"></nav>
-    <div class="foot" id="foot">数据仅存在本机 · 每日更新</div>
+    <div class="foot" id="foot">数据只在本机浏览器 · 不上传</div>
   </aside>
   <!-- main -->
   <main class="main"><div id="screen"></div></main>
@@ -914,13 +986,38 @@ function avgProgress(list){
 const modOf = k => CONFIG.modules.find(m=>m.key===k);
 const $ = s => document.querySelector(s);
 
+/* ---------- 本机档案（同一浏览器里隔离多人数据） ---------- */
+const PROFILE_KEY = "jobseeker-wb-profiles";
+const ACTIVE_KEY  = "jobseeker-wb-active";
+const STORE_BASE  = "jobseeker-workbench-v1";
+function profiles(){
+  try{ const a=JSON.parse(localStorage.getItem(PROFILE_KEY)||"[]"); return (Array.isArray(a)&&a.length)?a:[{id:"p1",name:"我的档案"}]; }
+  catch(e){ return [{id:"p1",name:"我的档案"}]; }
+}
+function saveProfiles(list){ localStorage.setItem(PROFILE_KEY, JSON.stringify(list)); }
+function activePid(){ return localStorage.getItem(ACTIVE_KEY)||"p1"; }
+function setActivePid(id){ localStorage.setItem(ACTIVE_KEY, id); }
+function activeProfile(){ const id=activePid(); const list=profiles(); return list.find(p=>p.id===id)||list[0]; }
+function storeKey(){ return STORE_BASE+"::"+activePid(); }
+function initProfiles(){
+  let list=null; try{ list=JSON.parse(localStorage.getItem(PROFILE_KEY)||"null"); }catch(e){}
+  if(!Array.isArray(list)||!list.length){
+    saveProfiles([{id:"p1",name:"我的档案"}]);
+    if(!localStorage.getItem(ACTIVE_KEY)) setActivePid("p1");
+    /* 老版本数据迁移到 p1，避免升级后看起来「数据没了」 */
+    const legacy=localStorage.getItem(STORE_BASE);
+    if(legacy && !localStorage.getItem(STORE_BASE+"::p1")) localStorage.setItem(STORE_BASE+"::p1", legacy);
+  }
+}
+initProfiles();
+
 const store = {
   load(){
-    const raw = localStorage.getItem(CONFIG.storageKey);
+    const raw = localStorage.getItem(storeKey());
     if(raw){ try { return JSON.parse(raw); } catch(e){} }
     const d={}; CONFIG.modules.forEach(m=>d[m.key]=structuredClone(m.seed||[])); return d;
   },
-  save(){ localStorage.setItem(CONFIG.storageKey, JSON.stringify(data)); },
+  save(){ localStorage.setItem(storeKey(), JSON.stringify(data)); },
 };
 let data = store.load();
 let view = "home";
@@ -1577,8 +1674,22 @@ function confirmDelete(key,id){ const item=(data[key]||[]).find(i=>i.id==id); if
 
 /* ---------- router / sidebar ---------- */
 function dateStr(){ const n=new Date(); const wd="日一二三四五六"[n.getDay()]; return `${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日 周${wd}`; }
-function go(v){ view=v; searchQ=""; renderNavActive(); render(); window.scrollTo({top:0}); }
+function go(v){ view=v; searchQ=""; closeDrawer(); renderNavActive(); render(); window.scrollTo({top:0}); }
+/* ---------- 移动端抽屉 ---------- */
+function closeDrawer(){
+  const sb=document.querySelector(".sidebar"); if(sb) sb.classList.remove("open");
+  const sc=document.getElementById("scrim"); if(sc) sc.classList.remove("on");
+}
+function wireDrawer(){
+  const sb=document.querySelector(".sidebar"), sc=document.getElementById("scrim");
+  const btn=document.getElementById("mnav");
+  if(btn) btn.onclick=()=>{ const on=sb.classList.toggle("open"); if(sc) sc.classList.toggle("on", on); };
+  if(sc) sc.onclick=closeDrawer;
+  const tag=document.getElementById("mt-tag"); if(tag) tag.textContent=activeProfile().name;
+  window.addEventListener("resize",()=>{ if(window.innerWidth>900) closeDrawer(); });
+}
 function render(){
+  const tag=document.getElementById("mt-tag"); if(tag) tag.textContent=activeProfile().name;
   if(view==="home") renderHome();
   else if(view==="flow") renderFlow();
   else if(view==="jobs") renderJobs();
@@ -4483,8 +4594,119 @@ function openPromptStudio(key){
 /* ============================================================
    JOBSEARCH · 设置
    ============================================================ */
+/* ---------- 备份与隐私 ---------- */
+function askInput(title, desc, opts){
+  const o = Object.assign({ label:"密码", type:"password", placeholder:"", okText:"确定" }, opts||{});
+  return new Promise(resolve=>{
+    const ov = openModal(`<h3>${esc(title)}</h3><div class="sub">${esc(desc)}</div>
+      <div class="field mt12"><label>${esc(o.label)}</label><input id="ask-in" type="${attr(o.type)}" placeholder="${attr(o.placeholder)}"/></div>
+      <div class="modal-actions"><div class="spacer"></div><button class="btn ghost" id="ask-cancel">取消</button>
+      <button class="btn" id="ask-ok">${esc(o.okText)}</button></div>`);
+    const inp = ov.querySelector("#ask-in");
+    const done = v=>{ ov.remove(); resolve(v); };
+    setTimeout(()=>inp.focus(), 40);
+    ov.querySelector("#ask-cancel").onclick = ()=>done(null);
+    ov.querySelector("#ask-ok").onclick = ()=>done(inp.value.trim()||null);
+    inp.onkeydown = e=>{ if(e.key==="Enter") done(inp.value.trim()||null); };
+  });
+}
+/* 备份正文：永远剔除 API Key，避免把密钥随文件发出去 */
+function exportPayload(){
+  const clone = JSON.parse(JSON.stringify(data));
+  if(clone.settings) delete clone.settings.apiKey;
+  clone.__meta = { app:"jobseeker-workbench", v:1, at:new Date().toISOString(), profile:activeProfile().name };
+  return clone;
+}
+function markExported(){
+  data.settings.lastExportAt = new Date().toISOString();
+  store.save();
+}
+function importPayload(obj){
+  if(!obj || !Array.isArray(obj.jobs)) return false;
+  delete obj.__meta;
+  if(obj.settings) delete obj.settings.apiKey;
+  const keepKey = (data.settings && data.settings.apiKey) || "";
+  data = obj;
+  ensureShape();
+  data.settings.privacyAck = true;
+  if(keepKey){ data.settings.apiKey = keepKey; data.settings.engine = "api"; }
+  store.save();
+  return true;
+}
+function b64enc(u8){
+  let s = "";
+  for(let i=0;i<u8.length;i+=0x8000) s += String.fromCharCode.apply(null, u8.subarray(i, i+0x8000));
+  return btoa(s);
+}
+function b64dec(str){
+  const bin = atob(str); const u8 = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) u8[i] = bin.charCodeAt(i);
+  return u8;
+}
+async function deriveKey(pw, salt, iter){
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), { name:"PBKDF2" }, false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({ name:"PBKDF2", salt, iterations:iter, hash:"SHA-256" },
+    km, { name:"AES-GCM", length:256 }, false, ["encrypt","decrypt"]);
+}
+async function encryptBackup(pw){
+  if(!(window.crypto && crypto.subtle)) throw new Error("当前浏览器不支持加密，请改用明文备份");
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(pw, salt, 150000);
+  const plain = new TextEncoder().encode(JSON.stringify(exportPayload()));
+  const ct = await crypto.subtle.encrypt({ name:"AES-GCM", iv }, key, plain);
+  return { app:"jobseeker-workbench", enc:"AES-256-GCM", v:1, at:new Date().toISOString(),
+    kdf:{ name:"PBKDF2", hash:"SHA-256", iter:150000, salt:b64enc(salt) },
+    iv:b64enc(iv), data:b64enc(new Uint8Array(ct)) };
+}
+async function decryptBackup(obj, pw){
+  if(!(window.crypto && crypto.subtle)) throw new Error("当前浏览器不支持解密");
+  const iter = (obj.kdf && obj.kdf.iter) || 150000;
+  const key = await deriveKey(pw, b64dec(obj.kdf.salt), iter);
+  const pt = await crypto.subtle.decrypt({ name:"AES-GCM", iv:b64dec(obj.iv) }, key, b64dec(obj.data));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function showPrivacyIntro(force){
+  const ov = openModal(`<h3>三件与隐私有关的事</h3>
+    <div class="sub">这个工作台不用注册，也没有服务器：你的内容只留在这台设备的浏览器里。</div>
+    <div class="priv-list">
+      <div class="priv-row"><b>1 数据只在本机</b><span>岗位、简历、面试记录存在浏览器本地存储。换设备、换浏览器、清理缓存都会看不到，请在「设置 → 本机数据」导出备份。</span></div>
+      <div class="priv-row"><b>2 分享的是应用</b><span>把链接发给朋友，对方看到的是各自的空白工作台，看不到你的内容；你也看不到对方的。</span></div>
+      <div class="priv-row"><b>3 共用设备要分档案</b><span>同一台电脑 / 手机同一个浏览器共用一份数据；多人使用请在「设置 → 本机档案」各建一份。</span></div>
+    </div>
+    <div class="modal-actions"><div class="spacer"></div><button class="btn" id="pv-ok">我知道了</button></div>`);
+  ov.querySelector("#pv-ok").onclick = ()=>{
+    if(data.settings && !data.settings.privacyAck){ data.settings.privacyAck = true; store.save(); }
+    ov.remove();
+  };
+}
+function maybePrivacyIntro(){ if(!(data.settings && data.settings.privacyAck)) showPrivacyIntro(false); }
+/* 微信内置浏览器提示（不能强制跳浏览器，只能引导） */
+function wechatTip(){
+  if(!/MicroMessenger/i.test(navigator.userAgent)) return;
+  if(sessionStorage.getItem("jsw-wx-tip")==="1") return;
+  const el = document.createElement("div"); el.className = "wxtip";
+  el.innerHTML = `<span>微信内置浏览器：点右上角 ··· → 「在浏览器打开」更稳；微信清理缓存会连这里的数据一起清掉。</span>
+    <button id="wxtip-x">知道了</button>`;
+  document.body.appendChild(el);
+  el.querySelector("#wxtip-x").onclick = ()=>{ sessionStorage.setItem("jsw-wx-tip","1"); el.remove(); };
+}
+
 function renderSettings(){
   const s = data.settings;
+  const pf = activeProfile();
+  const appUrl = location.href.split("?")[0].split("#")[0];
+  const sizeBytes = new Blob([JSON.stringify(data)]).size;
+  const lastBackup = s.lastExportAt ? String(s.lastExportAt).slice(0,10) : "从未备份";
+  const profRows = profiles().map(p=>{
+    const isCur = p.id===activePid();
+    let n = 0;
+    if(isCur) n = (data.jobs||[]).length + (data.resumes||[]).length;
+    else { try{ const o=JSON.parse(localStorage.getItem(STORE_BASE+"::"+p.id)||"null"); n=o?((o.jobs||[]).length+(o.resumes||[]).length):0; }catch(e){} }
+    return `<div class="cov-row"><span class="dot-pass" style="background:${isCur?"var(--accent)":"var(--border-input)"}"></span>
+      <div class="cv"><b>${esc(p.name)}</b><div class="tiny">${isCur?"当前档案":"其他档案"} · ${n} 条记录</div></div>
+      ${isCur?`<span class="tiny">使用中</span>`:`<button class="btn ghost sm js-pf-sw" data-id="${attr(p.id)}">切换</button>`}</div>`;
+  }).join("");
   const promptRows = Object.keys(PROMPTS).map(k=>{
     const p = PROMPTS[k];
     return `<div class="cov-row"><span class="dot-pass" style="background:var(--accent)"></span>
@@ -4506,10 +4728,10 @@ function renderSettings(){
         <div class="panel-lg">
           <h4>${icon("settings",16)} API 配置</h4>
           <div class="ph-sub">兼容 OpenAI 协议的任意服务（官方 / 中转 / 通义 / DeepSeek）</div>
-          <div class="field mt12"><label>接口地址</label><input id="set-base" value="${attr(s.baseUrl)}" placeholder="https://api.openai.com/v1"/></div>
+          <div class="field mt12"><label for="set-base">接口地址</label><input id="set-base" value="${attr(s.baseUrl)}" placeholder="https://api.openai.com/v1"/></div>
           <div class="field-row mt12">
-            <div class="field"><label>模型</label><input id="set-model" value="${attr(s.model)}" placeholder="gpt-4o-mini"/></div>
-            <div class="field"><label>API Key</label><input id="set-key" type="password" value="${attr(s.apiKey)}" placeholder="sk-..."/></div>
+            <div class="field"><label for="set-model">模型</label><input id="set-model" value="${attr(s.model)}" placeholder="gpt-4o-mini"/></div>
+            <div class="field"><label for="set-key">API Key</label><input id="set-key" type="password" value="${attr(s.apiKey)}" placeholder="sk-..."/></div>
           </div>
           <div class="flex mt12"><button class="btn sm" id="set-save">保存</button>
             <button class="btn line sm" id="set-test">测试连接</button>
@@ -4525,14 +4747,43 @@ function renderSettings(){
       </div>
 
       <div class="panel-lg mt18">
-        <h4>${icon("download",16)} 数据管理</h4>
-        <div class="ph-sub">所有内容都在本机浏览器里，换设备不会自动同步</div>
-        <div class="flex mt12 wrap">
-          <button class="btn sm" id="set-export">导出备份（JSON）</button>
-          <button class="btn line sm" id="set-import">导入备份</button>
-          <button class="btn line sm" id="set-reset">清空所有数据</button>
+        <h4>${icon("help",16)} 分享与隐私</h4>
+        <div class="ph-sub">分享出去的是这个应用本身，不是你的数据；每个人打开都是各自的空白工作台。</div>
+        <div class="priv-list">
+          <div class="priv-row"><b>好友看到什么</b><span>一个空工作台。岗位、简历、面试记录都只存在各自设备的浏览器里，不会上传，也不会互相可见。</span></div>
+          <div class="priv-row"><b>会共享什么</b><span>只有这个页面（含内置的示例岗位与示例简历）。你的填写内容不会被一起带走。</span></div>
+          <div class="priv-row"><b>微信里打开</b><span>点右上角 ··· → 「在浏览器打开」更稳；微信清理缓存会把内置浏览器的本地数据一起清掉。</span></div>
+          <div class="priv-row"><b>同一台设备</b><span>同一个浏览器共用一份数据。多人共用时，在下面「本机档案」各建一份，或用不同的浏览器 / 无痕窗口。</span></div>
+          <div class="priv-row"><b>备份文件</b><span>备份含手机号、邮箱、简历原文。发给别人前用「加密备份」设密码，明文备份只留给自己。</span></div>
+          <div class="priv-row"><b>网络请求</b><span>除你填的 AI 接口外，只有岗位雷达向 jsDelivr 拉取公开岗位数据；没有统计、广告或第三方脚本。</span></div>
         </div>
-        <div class="alert warn mt12">清空后岗位、简历、面试记录全部删除，且无法恢复。建议先导出备份。</div>
+        <div class="flex mt12 wrap">
+          <button class="btn line sm" id="set-copyurl">复制应用链接</button>
+          <button class="btn ghost sm" id="set-privacy">再看隐私说明</button>
+        </div>
+        <div class="pw-hint">链接：<span class="mono">${esc(appUrl)}</span></div>
+      </div>
+
+      <div class="panel-lg mt18">
+        <h4>${icon("download",16)} 本机数据</h4>
+        <div class="ph-sub">当前档案「${esc(pf.name)}」 · 占用 ${fmtSize(sizeBytes)} · 上次备份 ${esc(lastBackup)}</div>
+        <div class="flex mt12 wrap">
+          <button class="btn sm" id="set-export">导出备份（明文 JSON）</button>
+          <button class="btn sm" id="set-export-enc">加密备份（设密码）</button>
+          <button class="btn line sm" id="set-import">导入备份</button>
+          <button class="btn line sm" id="set-reset">清空当前档案</button>
+        </div>
+        <div class="alert warn mt12">备份不含 API Key；换设备、换浏览器或清理缓存都会丢数据，建议每月导出一次。</div>
+      </div>
+
+      <div class="panel-lg mt18">
+        <h4>${icon("file",16)} 本机档案</h4>
+        <div class="ph-sub">同一台设备上给不同的人各建一份，数据互不可见；切换后页面会重新加载</div>
+        ${profRows}
+        <div class="flex mt12 wrap">
+          <button class="btn line sm" id="set-pf-new">新建档案</button>
+          <button class="btn ghost sm" id="set-pf-rename">重命名当前档案</button>
+        </div>
       </div>`;
   wireSettings();
 }
@@ -4561,16 +4812,42 @@ function wireSettings(){
     }catch(e){ st.textContent = "失败：" + e.message; }
   };
   $("#screen").querySelectorAll(".js-prompt").forEach(b=>b.onclick=()=>openPromptStudio(b.dataset.key));
+  const url = location.href.split("?")[0].split("#")[0];
+  const cp = $("#set-copyurl");
+  if(cp) cp.onclick = ()=>copyText(url);
+  const pv = $("#set-privacy");
+  if(pv) pv.onclick = ()=>showPrivacyIntro(true);
+
   const ex = $("#set-export");
-  if(ex) ex.onclick = ()=>{
-    downloadText("求职作战室-备份-"+isoToday()+".json", JSON.stringify(data,null,2));
-    toast("已导出备份文件");
+  ex.onclick = ()=>{
+    downloadText("求职作战室-备份-"+isoToday()+".json", JSON.stringify(exportPayload(),null,2));
+    markExported(); render(); toast("已导出备份（不含 API Key）");
   };
+  const exe = $("#set-export-enc");
+  exe.onclick = async ()=>{
+    const pw = await askInput("设置备份密码", "密码只用于这一个备份文件，忘记无法找回。建议 8 位以上，且不要与常用账号相同。", {label:"备份密码", placeholder:"至少 8 位"});
+    if(!pw) return;
+    if(pw.length<6){ toast("密码太短，建议 8 位以上"); return; }
+    exe.disabled = true; exe.textContent = "加密中…";
+    try{
+      const obj = await encryptBackup(pw);
+      downloadText("求职作战室-加密备份-"+isoToday()+".json", JSON.stringify(obj,null,2));
+      markExported(); render(); toast("已导出加密备份");
+    }catch(e){
+      toast("加密失败："+e.message);
+    }finally{
+      const b = $("#set-export-enc");
+      if(b){ b.disabled=false; b.textContent="加密备份（设密码）"; }
+    }
+  };
+
   const im = $("#set-import");
-  if(im) im.onclick = ()=>{
-    const ov = openModal(`<h3>导入备份</h3><div class="sub">粘贴之前导出的 JSON，或选择文件</div>
-      <div class="field mt12"><input type="file" id="imp-file" accept=".json"/></div>
-      <div class="field"><textarea id="imp-text" placeholder="粘贴 JSON 内容"></textarea></div>
+  im.onclick = ()=>{
+    const ov = openModal(`<h3>导入备份</h3><div class="sub">支持明文与加密备份；导入会覆盖当前档案，本机已有的 API Key 不会被覆盖</div>
+      <div class="field mt12"><input type="file" id="imp-file" accept=".json,application/json"/></div>
+      <div class="field"><textarea id="imp-text" placeholder="粘贴备份 JSON 内容"></textarea></div>
+      <div class="field" id="imp-pw-wrap" style="display:none"><label>备份密码</label><input id="imp-pw" type="password" placeholder="加密备份需要密码"/></div>
+      <div class="tiny" id="imp-state"></div>
       <div class="modal-actions"><div class="spacer"></div><button class="btn ghost" id="imp-cancel">取消</button>
       <button class="btn" id="imp-ok">导入</button></div>`, true);
     ov.querySelector("#imp-file").onchange = e=>{
@@ -4578,17 +4855,49 @@ function wireSettings(){
       const rd = new FileReader(); rd.onload = ()=>{ ov.querySelector("#imp-text").value = rd.result; }; rd.readAsText(f);
     };
     ov.querySelector("#imp-cancel").onclick = ()=>ov.remove();
-    ov.querySelector("#imp-ok").onclick = ()=>{
-      const obj = parseJSON(ov.querySelector("#imp-text").value);
-      if(!obj || !Array.isArray(obj.jobs)){ toast("这不是有效的备份文件"); return; }
-      data = obj; ensureShape(); store.save(); ov.remove(); toast("导入完成"); render();
+    ov.querySelector("#imp-ok").onclick = async ()=>{
+      const st = ov.querySelector("#imp-state");
+      let obj = parseJSON(ov.querySelector("#imp-text").value);
+      if(!obj){ st.textContent = "这不是有效的 JSON"; return; }
+      if(obj.enc){
+        ov.querySelector("#imp-pw-wrap").style.display = "";
+        const pw = ov.querySelector("#imp-pw").value;
+        if(!pw){ st.textContent = "这份备份已加密，请输入密码"; ov.querySelector("#imp-pw").focus(); return; }
+        st.textContent = "解密中…";
+        try{ obj = await decryptBackup(obj, pw); }
+        catch(e){ st.textContent = "密码不对，或文件已损坏"; return; }
+      }
+      if(!importPayload(obj)){ st.textContent = "这不是本工作台的备份（缺少 jobs 字段）"; return; }
+      ov.remove(); toast("导入完成"); render();
     };
   };
+
   const rs = $("#set-reset");
-  if(rs) rs.onclick = ()=>{
-    if(!confirm("清空全部数据？岗位、简历、面试记录都会删除，无法恢复。")) return;
-    localStorage.removeItem(CONFIG.storageKey);
+  rs.onclick = ()=>{
+    if(!confirm("清空当前档案？岗位、简历、面试记录都会删除，其他档案不受影响，且无法恢复。")) return;
+    localStorage.removeItem(storeKey());
     location.reload();
+  };
+
+  $("#screen").querySelectorAll(".js-pf-sw").forEach(b=>b.onclick=()=>{
+    if(b.dataset.id===activePid()) return;
+    setActivePid(b.dataset.id); location.reload();
+  });
+  const pn = $("#set-pf-new");
+  if(pn) pn.onclick = async ()=>{
+    const name = await askInput("新建本机档案", "给这份档案起个名字（比如「小李」）。档案之间数据完全隔离，切换后页面会重新加载。", {label:"档案名", type:"text", placeholder:"最多 20 字"});
+    if(!name) return;
+    const list = profiles();
+    const id = "p" + Date.now().toString(36);
+    list.push({ id, name:name.slice(0,20) });
+    saveProfiles(list); setActivePid(id); location.reload();
+  };
+  const pr = $("#set-pf-rename");
+  if(pr) pr.onclick = async ()=>{
+    const name = await askInput("重命名当前档案", "只改名称，不影响档案里的数据。", {label:"新名称", type:"text", placeholder:"最多 20 字", okText:"保存"});
+    if(!name) return;
+    const list = profiles().map(p=>p.id===activePid()?{...p,name:name.slice(0,20)}:p);
+    saveProfiles(list); render();
   };
 }
 
@@ -5165,6 +5474,9 @@ function ensureShape(){
 ensureShape();
 buildNav();
 render();
+wireDrawer();
+maybePrivacyIntro();
+wechatTip();
 </script>
 </body>
 </html>

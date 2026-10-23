@@ -138,7 +138,7 @@
     <span>一个离线可用的求职工作台：把「岗位 JD + 个人简历」变成一份有针对性的简历、一场能练的模拟面试，以及一组真正加分的反问。</span>
   </h1>
   <div class="meta-line">
-    <span>版本 v1.0</span><i></i><span>形态 桌面单页应用</span><i></i><span>部署 本地文件 · 无后端</span><i></i><span class="mono">2026-10-21</span>
+    <span>版本 v1.1</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
   </div>
 </header>
 
@@ -146,7 +146,7 @@
   <div class="metric"><b>10<em>个</em></b><span>导航入口，覆盖投递前到面试后</span></div>
   <div class="metric"><b>8<em>类</em></b><span>可复用 AI 提示词，支持提示词工坊</span></div>
   <div class="metric"><b>31<em>组</em></b><span>本地技能词典，无网络也能算匹配</span></div>
-  <div class="metric"><b>0<em>条</em></b><span>端到端验证中的控制台报错</span></div>
+  <div class="metric"><b>45<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
 </div>
 
 <main>
@@ -393,7 +393,7 @@ flowchart LR
         <tr><td>7</td><td>反问清单与复制</td><td><span class="tag ok">PASS</span></td><td>六组卡片与「别这样问」清单存在；复制失败时给出明确提示</td></tr>
         <tr><td>8</td><td>设置页与提示词工坊</td><td><span class="tag ok">PASS</span></td><td>8 条提示词可生成，弹窗文本框内容完整</td></tr>
         <tr><td>9</td><td>控制台</td><td><span class="tag ok">PASS</span></td><td>全程 0 条 error 级消息（favicon 已内联，无 404）</td></tr>
-        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：229,567 字符，1 个 script 块（整份 HTML 290,207 字符）</td></tr>
+        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：241,660 字符，1 个 script 块（整份 HTML 306,829 字符 / 347,224 字节）</td></tr>
         <tr><td>11</td><td>JD 上传 .docx</td><td><span class="tag ok">PASS</span></td><td>中文标题、岗位职责、任职要求完整提取；预览确认后填入</td></tr>
         <tr><td>12</td><td>简历上传 .docx</td><td><span class="tag ok">PASS</span></td><td>简历弹窗同一解析器可用，填入后可继续点「回填到上方各栏」</td></tr>
         <tr><td>13</td><td>上传含文字层 PDF</td><td><span class="tag ok">PASS</span></td><td>11 行简历文本逐行提取，未触发乱码告警</td></tr>
@@ -422,6 +422,13 @@ flowchart LR
         <tr><td>36</td><td>直连抓取失败 → 粘贴 → 本地拆分</td><td><span class="tag ok">PASS</span></td><td>原站无跨域许可时状态行显示「直连抓取失败：原站不允许跨域读取 · 请点『打开原文』后复制正文粘贴」，3.5 秒超时后不阻塞弹窗；粘贴含「岗位职责 / 任职要求」的正文后自动拆出 3 条职责 / 3 条要求，行首编号被清理，「…优先」在保存时归入加分项；手改某一栏后再改正文，手改内容不被覆盖</td></tr>
         <tr><td>37</td><td>保存 / 跳过与队列递减</td><td><span class="tag ok">PASS</span></td><td>「保存并下一条」后记录写入 <code>parsed.duties / parsed.must / parsed.nice</code>、<code>jdFilled</code> 落库、<code>jdPending</code> 移除，卡片徽章消失；点「跳过这条」不写库且该条继续留在队列（雷达工具条显示「补 JD（1）」）；全部补完后按钮消失，<code>pendingJobs()</code> 为 0；直连成功路径（打桩返回公告 HTML）自动填满正文并拆好两栏</td></tr>
         <tr><td>38</td><td>新增「材料与化工」方向</td><td><span class="tag ok">PASS</span></td><td>方向行由 5 个增至 7 个标签（全部 + 计算机IT / 电子信息 / 自动化 / 嵌入式 / 物联网 / 材料与化工），单行排列、面板无横向溢出；点「材料与化工」后列表 60 条全部带该方向徽章，池内共 1,008 条（行业为「能源/化工/环保」664、「新能源」88、「制造业」64）；离线示例池由 8 条增至 10 条，切到该方向正好 2 条（材料研发工程师 / 化工工艺工程师）；「中学化学教师」这类教师 / 教研岗被排除，该方向 0 条；批量加入与补 JD 向导对新增方向同样生效，控制台 0 error</td></tr>
+        <tr><td>39</td><td>隐私 meta 头</td><td><span class="tag ok">PASS</span></td><td>页面 head 读出 <code>robots=noindex,nofollow,noarchive</code>、<code>referrer=no-referrer</code>、<code>format-detection=telephone=no,email=no,address=no</code>：不会被搜索引擎收录，外链点击不携带来源页地址，手机号 / 邮箱不会被自动识别成可拨号链接</td></tr>
+        <tr><td>40</td><td>备份剔除 API Key</td><td><span class="tag ok">PASS</span></td><td>本机写入 <code>sk-SECRET-TEST</code> 后导出，明文备份 JSON 内检索该串为 <code>false</code>（<code>exportHasApiKey=false</code>）；加密备份密文内同样检索不到；备份带 <code>__meta</code>（应用名 / 版本 / 时间 / 档案名），导入时该字段被剥除</td></tr>
+        <tr><td>41</td><td>加密备份往返与错误密码</td><td><span class="tag ok">PASS</span></td><td>PBKDF2-SHA256 150,000 次派生 + AES-256-GCM，密文头为 <code>{app,enc:"AES-256-GCM",v:1,kdf:{salt,iter},iv,data}</code>；同密码解密后 <code>jobs</code> 仍为数组、<code>__meta.app</code> 正确、不含 apiKey；换错误密码抛 <code>OperationError</code> 被捕获并提示，不产生半截数据</td></tr>
+        <tr><td>42</td><td>导入备份保留本机 Key</td><td><span class="tag ok">PASS</span></td><td>解密得到的 <code>jobs</code> 直接走 <code>importPayload</code>：本机原 Key 保留且 <code>engine</code> 自动置 <code>api</code>，<code>privacyAck</code> 置 <code>true</code>（不会重复弹首次说明）；非备份文件（无 <code>jobs</code> 数组）返回 <code>false</code> 且不改动现有数据</td></tr>
+        <tr><td>43</td><td>本机档案隔离</td><td><span class="tag ok">PASS</span></td><td>写入 <code>jobseeker-workbench-v1::px</code> 后回读 <code>::p1</code>：无标记且长度不变（<code>p1LeakedMarker=false</code>、<code>p1LenUnchanged=true</code>）；<code>setActivePid</code> 切换后 <code>storeKey()</code> 分别指向 <code>::px</code> / <code>::p1</code>，顶栏档案名同步为「我的档案」；旧版单键 <code>jobseeker-workbench-v1</code> 自动迁移到 <code>::p1</code> 且原键已清理</td></tr>
+        <tr><td>44</td><td>手机视口（456px）</td><td><span class="tag ok">PASS</span></td><td><code>body min-width</code> 由 1000px 归零，横向溢出为 <code>-14</code>（无滚动条）；顶栏 <code>display:flex</code>、主区左外边距 0；点汉堡后侧栏左边缘 0、遮罩 <code>opacity:1 / pointer-events:auto</code>，点遮罩后侧栏回到 -278、遮罩归 0；设置页六条隐私行折叠为单列（376px），按钮整行排列不重叠</td></tr>
+        <tr><td>45</td><td>桌面视口（1165px）回归</td><td><span class="tag ok">PASS</span></td><td>顶栏隐藏、侧栏常驻 258px、<code>min-width</code> 仍为 1000px，隐私行维持 132px + 640px 两列；两视口控制台均无 error（仅剩 1 条无障碍提示，已为三处设置输入补 <code>for/id</code> 关联）</td></tr>
       </tbody>
     </table>
   </div>
@@ -431,17 +438,65 @@ flowchart LR
 </section>
 
 <section>
-  <h2>九、使用前需要知道的三件事</h2>
+  <h2>九、分享给好友，与四道隐私边界</h2>
+  <p class="lead">这份工作台没有账号、没有服务器，分享方式也因此很朴素：<strong>把链接发出去，每个人在自己的浏览器里各存一份</strong>。数据隔离由浏览器本身完成，不靠后台权限校验——因为根本不存在能读到别人数据的后台。</p>
+
+  <h3>1. 好友打开看到的是什么</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:22%">项目</th><th>好友打开后</th></tr></thead>
+      <tbody>
+        <tr><td><strong>岗位 / 简历 / 面试记录</strong></td><td>空工作台 + 内置示例数据，你填的内容一条都不会跟着链接过去</td></tr>
+        <tr><td><strong>API Key</strong></td><td>空值，对方填自己的</td></tr>
+        <tr><td><strong>你的操作痕迹</strong></td><td>不存在。链接里不带任何参数，也没有埋点上报</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p>反过来说，<strong>你也看不到对方的</strong>：内容存在对方设备的浏览器里，既不上传也没有互相读取的通道。</p>
+
+  <h3>2. 四道边界，以及它们各自防的是什么</h3>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:20%">边界</th><th style="width:26%">防的问题</th><th>落地方式</th></tr></thead>
+      <tbody>
+        <tr><td><strong>搜索引擎收录</strong></td><td>公开链接被爬虫抓走，出现在搜索结果里</td><td><code>meta robots</code> 设 <code>noindex,nofollow,noarchive</code></td></tr>
+        <tr><td><strong>来源地址外泄</strong></td><td>点外链时浏览器把当前页地址作为 Referer 带出去</td><td><code>meta referrer</code> 设 <code>no-referrer</code></td></tr>
+        <tr><td><strong>API Key 随文件外流</strong></td><td>把备份发给别人，密钥跟着走</td><td>导出前深拷贝并删除 <code>settings.apiKey</code>，明文与加密备份都不含 Key</td></tr>
+        <tr><td><strong>备份文件被翻看</strong></td><td>简历含手机号、邮箱、原公司，明文文件谁拿到都能读</td><td>加密备份：PBKDF2-SHA256 150,000 次派生 + AES-256-GCM，密码不落盘</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3. 共用设备怎么办</h3>
+  <p>浏览器的本地存储以「设备 + 浏览器」为单位，同一台电脑上的同一个浏览器只有一份数据。所以内置了<strong>本机档案</strong>：在设置页新建几份档案，存储键从 <code>jobseeker-workbench-v1</code> 变为 <code>jobseeker-workbench-v1::档案ID</code>，切换时整页重载，内存里的旧数据不会残留。旧版本的单键数据会自动迁移到第一份档案，升级不丢内容。</p>
+  <div class="callout blue">
+    <b>分工建议：</b>自己用一份档案；借电脑给家人朋友时让对方另建一份，或直接开无痕窗口；公用机房电脑不要填 API Key，用完点「清空当前档案」。
+  </div>
+
+  <h3>4. 微信里打开会怎样</h3>
+  <p>微信内置浏览器能正常打开，但它有两条不太友好的规则：一是清理微信缓存会把内置浏览器的本地数据一起清掉；二是转发链接后地址容易被二次包装。所以页面检测到 <code>MicroMessenger</code> 时会在底部提示「右上角 → 在浏览器打开」，并说明缓存清理的风险。这一步<strong>只能引导，不能强制跳转</strong>——微信不允许网页自行唤起外部浏览器。</p>
+  <p>相应地，界面在 900px 以下切换为移动布局：侧栏收成抽屉、顶栏常驻、栅格折叠为单列，456px 宽度下实测无横向溢出。</p>
+
+  <h3>5. 网络请求只有两类</h3>
+  <ul>
+    <li>你自己填的 AI 接口（不填就完全不发）。</li>
+    <li>岗位雷达向 jsDelivr 拉取公开岗位公告数据（只读取，不提交任何个人信息）。</li>
+  </ul>
+  <p>没有统计、没有广告、没有第三方脚本，也没有任何形式的使用行为上报。</p>
+</section>
+
+<section>
+  <h2>十、使用前需要知道的三件事</h2>
   <h3>1. 数据只在这台设备的这个浏览器里</h3>
-  <p>所有岗位、简历、面试记录都保存在浏览器的本地存储中，没有云端、没有账号、没有同步。<strong>换电脑、换浏览器、清除浏览记录，之前填的内容就没了。</strong>设置页提供「导出 JSON 备份」，重要内容建议定期导出。</p>
+  <p>所有岗位、简历、面试记录都保存在浏览器的本地存储中，没有云端、没有账号、没有同步。<strong>换电脑、换浏览器、清除浏览记录，之前填的内容就没了。</strong>设置页提供「导出备份」，重要内容建议定期导出；同一设备多人使用时用「本机档案」分开。</p>
   <h3>2. API Key 也只在你本地</h3>
-  <p>如果填写了 API Key，它同样只存在本地浏览器，请求从你的浏览器直接发往你填写的服务地址，不经过任何中间服务器。公用电脑上不建议保存 Key，用完可在设置页清空。</p>
+  <p>Key 同样只存在本地浏览器，请求从你的浏览器直接发往你填写的服务地址，不经过任何中间服务器；备份文件里不含 Key。公用电脑上不建议保存，用完可在设置页清空。</p>
   <h3>3. 它是练习工具，不是录取预测</h3>
   <p>匹配分与答辩分用来横向比较不同岗位、不同版本的简历，以及观察自己的进步趋势，不代表企业的真实筛选结果。所有改写建议在采用前，请确认每一句都经得起追问。</p>
 </section>
 
 <section>
-  <h2>十、三步上手</h2>
+  <h2>十一、三步上手</h2>
   <div class="steps">
     <div class="step"><span class="no">01</span><h4>先往岗位库里放几个真岗位</h4><p>打开「岗位库」，顶部「岗位雷达」按方向 / 企业 / 城市筛一筛，勾选后批量加入；公告类会自动进入「补 JD」向导，能直连的就自动填好，不能的就点「打开原文」粘贴正文，两栏拆好后再保存。也可以新建一条，把 JD 上传或粘进去。再去「简历库」上传你的简历，替换示例数据。</p></div>
     <div class="step"><span class="no">02</span><h4>先看分，再改简历</h4><p>进「匹配分析」看缺口，点「一键改写简历」按岗位整体调一版，或勾选具体建议再生成定制版；改完用旁边的「简历阅览」通读。</p></div>
@@ -452,7 +507,7 @@ flowchart LR
 </main>
 
 <footer>
-  <b>求职作战室 v1.0</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
+  <b>求职作战室 v1.1</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
   交付物：<span class="mono">jobseeker-workbench/jobseeker-workbench.html</span> + <span class="mono">assets/greet-banner.jpg</span> · 本报告：<span class="mono">jobseeker-report/jobseeker-report.html</span>
 </footer>
 

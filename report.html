@@ -4,7 +4,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>求职作战室 · 产品说明与验证报告</title>
+<title>启程 · 产品说明与验证报告（v2.5）</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%2334508c'/%3E%3Cpath d='M5 17V9m5 8V5m5 12v-6' stroke='%23fff' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E" />
 <style>
   @font-face { font-family:'Instrument Sans'; src:url('./_shared/fonts/InstrumentSans-Regular.ttf') format('truetype'); font-weight:400; font-display:swap; }
@@ -119,6 +119,13 @@
   footer{margin-top:4rem;padding-top:1.4rem;border-top:1px solid var(--rule);font-size:.78rem;color:var(--muted);overflow-wrap:anywhere}
   footer b{color:var(--ink)}
 
+  /* ---------- file tree ---------- */
+  pre.tree{margin:1.2rem 0;padding:1rem 1.15rem;background:rgba(255,255,255,.8);border:1px solid rgba(52,80,140,.1);
+    border-radius:12px;font-family:var(--font-mono);font-size:.78rem;line-height:1.9;color:#2a3446;
+    overflow-x:auto;white-space:pre}
+  pre.tree b{color:var(--accent);font-weight:700}
+  pre.tree i{color:var(--muted);font-style:normal}
+
   @media (max-width:760px){
     body{padding:2.2rem 1rem 3rem}
     h1{font-size:1.9rem}
@@ -137,26 +144,114 @@
 <article class="page">
 
 <header class="cover">
-  <div class="kicker">Jobseeker Workbench · 交付与验证报告</div>
-  <h1>求职作战室
-    <span>一个离线可用的求职工作台：把「岗位 JD + 个人简历」变成一份有针对性的简历、一场能练的模拟面试，以及一组真正加分的反问。</span>
+  <div class="kicker">Qicheng · 交付与验证报告</div>
+  <h1>启程
+    <span>一个本地优先的求职工作台：把「岗位 JD + 个人简历」变成一份有针对性的简历、一场能练的模拟面试，以及一组真正加分的反问。数据只留在自己的浏览器里。</span>
   </h1>
   <div class="meta-line">
-    <span>版本 v1.4</span><i></i><span>形态 单文件网页 · 手机 / 桌面自适应</span><i></i><span>部署 静态链接 · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-23</span>
+    <span>版本 v2.5</span><i></i><span>形态 多文件静态站点 + PWA</span><i></i><span>部署 GitHub Pages · 无后端 · 数据不出本机</span><i></i><span class="mono">2026-10-24</span>
   </div>
 </header>
 
 <div class="metrics">
-  <div class="metric"><b>10<em>个</em></b><span>导航入口，覆盖投递前到面试后</span></div>
-  <div class="metric"><b>8<em>类</em></b><span>可复用 AI 提示词，支持提示词工坊</span></div>
-  <div class="metric"><b>31<em>组</em></b><span>本地技能词典，无网络也能算匹配</span></div>
-  <div class="metric"><b>53<em>项</em></b><span>端到端验证用例，控制台 0 条报错</span></div>
+  <div class="metric"><b>14<em>个</em></b><span>导航入口 + 1 个全局搜索，覆盖投递前到面试后</span></div>
+  <div class="metric"><b>15<em>个</em></b><span>按功能拆分的脚本分片，顺序加载</span></div>
+  <div class="metric"><b>65<em>项</em></b><span>验证用例：53 项基线 + 12 项本轮实测</span></div>
+  <div class="metric"><b>0<em>条</em></b><span>控制台 error / warning，0 个 4xx·5xx</span></div>
 </div>
 
 <main>
 
 <section>
-  <h2>一、它解决的不是「写简历」，而是四个断点</h2>
+  <h2>一、v2.5 这一版改了什么</h2>
+  <p class="lead">v1.4 是一份 397 KB 的单文件网页；v2.5 把它整理成可维护的静态站点，并上线到 GitHub Pages。产品能力没有推倒重来，变的是代码组织、可访问性与分发方式。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:16%">维度</th><th style="width:34%">v1.4</th><th>v2.5</th></tr></thead>
+      <tbody>
+        <tr><td><strong>代码组织</strong></td><td>一个 <code>app.js</code>，397,341 B</td><td>按功能拆成 <strong>15 个分片</strong>，合计 394,716 B（比原单块少 2,625 B）；<code>index.html</code> 只留骨架与 15 个 <code>defer</code> 引用</td></tr>
+        <tr><td><strong>主题</strong></td><td>浅色 + 深色两套，靠 <code>data-theme</code> 切换</td><td>只保留浅色；<code>data-theme</code> / <code>applyTheme</code> / <code>prefers-color-scheme</code> 全站 0 处残留</td></tr>
+        <tr><td><strong>图标与离线</strong></td><td>内联 data URI 图标，无离线能力</td><td>SVG + 192/512 PNG 图标、<code>manifest.webmanifest</code>、Service Worker（23 项预缓存），断网仍可打开</td></tr>
+        <tr><td><strong>无障碍</strong></td><td>搜索按钮用 <code>aria-label</code>；弹窗焦点不回收</td><td>可访问名直接取可见文本、<code>aria-current</code> 标注当前页、设置项 <code>for/id</code> 关联、弹窗焦点环 + Esc 关闭 + 焦点归还</td></tr>
+        <tr><td><strong>分发</strong></td><td>单文件下载或本地打开</td><td>仓库根即 Pages 站点根，地址不变：<span class="mono">https://jixu789.github.io/jobseeker-workbench/</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout blue">
+    <b>这次提交：</b>提交 <span class="mono">af37b89</span>，24 个文件，<span class="mono">+7,992 / −5,815</span>，由 <span class="mono">25ef1a5</span> 推送而来。拆分前的单块脚本在本地留了一份 <span class="mono">assets/js/_legacy/app.js.bak</span> 作对照，<strong>不参与加载、不入库</strong>。本报告的验证章节也按同一原则标注：1–53 为 v1.4 基线，54–65 为本轮实测。
+  </div>
+</section>
+
+<section>
+  <h2>二、结构与部署</h2>
+  <p>仓库根就是站点根。<code>index.html</code> 不再内联任何业务代码，只保留页面骨架、样式表和 15 个按文档顺序执行的 <code>defer</code> 脚本——<code>defer</code> 脚本在 DOM 解析完成后按出现顺序执行，因此与原来的单块脚本等价，15 条路由的渲染节点数逐项一致。</p>
+
+  <pre class="tree">jobseeker-workbench/
+├── <b>index.html</b>                    3,466 B   骨架 + 15 个 defer 引用
+├── <b>report.html</b>                            本报告
+├── manifest.webmanifest          1,092 B
+├── sw.js                         2,710 B   qicheng-shell-v4 · 23 项预缓存
+├── .nojekyll
+├── assets/
+│   ├── css/app.css              89,480 B   晨光橙 × 墨蓝，仅浅色
+│   ├── js/parts/
+│   │   ├── 01-core.js           76,248 B   路由 / 档案 / 侧栏 / 图标
+│   │   ├── 02-data.js            3,544 B   数据层 / toast / 弹窗
+│   │   ├── 03-search.js         38,620 B   全局搜索 / JD 解析 / 匹配引擎
+│   │   ├── 04-ui.js              5,478 B
+│   │   ├── 05-jobs.js           63,969 B   岗位库 / 雷达 / 补 JD / 投递
+│   │   ├── 06-resume.js         45,276 B   简历库 / 表单 / 阅览
+│   │   ├── 07-import.js         12,628 B   Word / PDF / 图片导入
+│   │   ├── 08-match.js          10,843 B   匹配分析 / ATS / 改写
+│   │   ├── 09-ai.js             17,345 B   8 类提示词与 API 调用
+│   │   ├── 10-settings.js       13,479 B   设置 / 备份导入导出
+│   │   ├── 11-keyvault.js       46,524 B   API Key 保险箱
+│   │   ├── 12-interview.js      23,820 B   模拟面试
+│   │   ├── 13-reverse.js         8,788 B   反问助手
+│   │   ├── 14-board.js          26,054 B   看板 / 日历 / 周报 / 待办 / 笔记 / 帮助
+│   │   └── 15-boot.js            2,100 B   启动与首次运行
+│   ├── icons/   qicheng.svg · qicheng-192.png · qicheng-512.png
+│   └── img/     greet-banner.jpg  174,943 B
+├── assets/charts.js                        本报告图表
+└── _shared/                                字体 · echarts · mermaid</pre>
+  <p>合计 15 个分片 <strong>394,716 B</strong>；与拆分前的 397,341 B 相比少 2,625 B，差额来自拆分处重复的注释头与小段工具函数归并，没有删除任何功能。</p>
+
+  <figure class="chart-figure">
+    <figcaption>图 1　从源目录到可离线打开 <em>一次提交完成的发布链路</em></figcaption>
+    <div class="mermaid-wrap">
+      <pre class="mermaid">
+flowchart LR
+  S["源目录 qicheng/"] --> P["15 个脚本分片<br/>394,716 B"]
+  P --> C["git commit af37b89<br/>24 个文件"]
+  C --> G["GitHub Pages<br/>仓库根 = 站点根"]
+  G --> I["index.html 3,466 B<br/>15 个 defer"]
+  I --> W["Service Worker<br/>qicheng-shell-v4 · 23 项"]
+  W --> O["断网仍可打开<br/>数据留在本机"]
+      </pre>
+    </div>
+    <div class="desc">首次访问后资源进入浏览器缓存；之后即使断网，导航与页面仍可打开，改动在联网后按「网络优先」自动更新。</div>
+  </figure>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:20%">项目</th><th style="width:26%">取值</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>缓存名</strong></td><td><span class="mono">qicheng-shell-v4</span></td><td>发版时改版本号即可整体替换，<code>activate</code> 阶段删除其余旧缓存</td></tr>
+        <tr><td><strong>预缓存</strong></td><td>23 项</td><td>首页、样式、15 个分片、manifest、3 个图标、首页横幅</td></tr>
+        <tr><td><strong>代码类</strong></td><td>网络优先</td><td>导航请求与 <code>html / css / js / webmanifest</code> 先取网络，成功即回写缓存；失败回退缓存</td></tr>
+        <tr><td><strong>图片 / 图标</strong></td><td>缓存优先</td><td>命中直接用，未命中再取网络并回写</td></tr>
+        <tr><td><strong>注册条件</strong></td><td>仅 <code>http(s)</code></td><td>本地用 <code>file://</code> 直接打开时不注册，避免无意义的失败请求</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout">
+    <b>为什么代码走「网络优先」：</b>这是一份还在内测的站点，改动要立刻可见比离线秒开更重要。图片与图标则相反——它们不会随版本变，交给缓存优先更划算。<br>
+    <b>Pages 有 10 分钟边缘缓存：</b>推送后短时间内仍可能拿到旧文件（响应头 <code>Cache-Control: max-age=600</code>）。本轮复验就是靠这一点定位的：首页先返回 370,642 B 的旧内容，加时间戳查询串重取后变为 3,466 B、<code>ETag "6adccd74-d8a"</code>。
+  </div>
+</section>
+
+<section>
+  <h2>三、它解决的不是「写简历」，而是四个断点</h2>
   <p class="lead">大部分求职工具只做一件事：排版或者生成一段话。真实求职卡住的地方，往往是四段没有反馈的黑箱。</p>
   <div class="table-wrap">
     <table>
@@ -172,11 +267,11 @@
 </section>
 
 <section>
-  <h2>二、工作流全景</h2>
+  <h2>四、工作流全景</h2>
   <p>下面这条主线就是应用里的「求职流程」页：五步向导把散落的工具串成一条可执行路径，每一步都留下可复用的产物。</p>
 
   <figure class="chart-figure">
-    <figcaption>图 1　从 JD 到复盘的七段闭环 <em>求职流程页的五步向导 + 面试后延伸</em></figcaption>
+    <figcaption>图 2　从 JD 到复盘的七段闭环 <em>求职流程页的五步向导 + 面试后延伸</em></figcaption>
     <div class="mermaid-wrap">
       <pre class="mermaid">
 flowchart LR
@@ -203,22 +298,26 @@ flowchart LR
 </section>
 
 <section>
-  <h2>三、十个入口，两类工作台</h2>
-  <p>侧栏按「求职主线 / 面试演练 / 复盘沉淀 / 偏好」分组。前七个是专门为这条流程做的视图，后三个是复用同一套数据层的通用模块。</p>
+  <h2>五、十四个入口，四类工作台</h2>
+  <p>侧栏按「求职主线 / 面试演练 / 复盘沉淀 / 偏好」分组：7 + 2 + 3 + 2 = <strong>14 个入口</strong>。第 15 个可聚焦元素是侧栏顶部的搜索按钮（<span class="mono">Ctrl / ⌘ + K</span>），它只唤出命令面板，不占一行路由。</p>
   <div class="table-wrap">
     <table>
-      <thead><tr><th style="width:18%">入口</th><th style="width:26%">它回答的问题</th><th>关键能力</th></tr></thead>
+      <thead><tr><th style="width:14%">分组</th><th style="width:14%">入口</th><th style="width:20%">它回答的问题</th><th>关键能力</th></tr></thead>
       <tbody>
-        <tr><td><strong>首页</strong></td><td>我现在该做什么</td><td>今日待办、当前岗位与简历、匹配分、下一步动作建议</td></tr>
-        <tr><td><strong>求职流程</strong></td><td>整条路走到哪了</td><td>五步向导 + 进度指示灯，点击可直达对应视图</td></tr>
-        <tr><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」动态抓取六个技术方向的公开岗位，卡片式列表（右侧高亮 + 标签 + 公司行），点开是职位详情（职位信息 / 公司信息），可批量入库；JD 增删改、自动分段、技能标签、设为当前目标；支持上传 .docx / PDF / 截图识别；每张卡片带<strong>「一键投递」</strong>，按未投 / 已投筛选，并新增<strong>「行业」筛选行</strong>（自动归类 + 手动指定）</td></tr>
-        <tr><td><strong>简历库</strong></td><td>我手里有哪些版本</td><td>多份简历、逐段编辑、一键复制全文；支持上传 .docx / PDF / 截图并自动拆字段</td></tr>
-        <tr><td><strong>匹配分析</strong></td><td>差多少、差在哪</td><td>匹配分环形图、技能覆盖、ATS 六项、缺口清单、一键按岗位改写简历</td></tr>
-        <tr><td><strong>定制改写</strong></td><td>这句话该怎么写</td><td>逐条 before/after 对照，采纳后生成定制版</td></tr>
-        <tr><td><strong>模拟面试</strong></td><td>我答得怎么样</td><td>对话式 / 逐题训练两种模式，即时点评与四维评分</td></tr>
-        <tr><td><strong>反问助手</strong></td><td>最后五分钟问什么</td><td>六组问题、按缺口定制、五条禁区、一键复制</td></tr>
-        <tr><td><strong>复盘待办</strong></td><td>下一步补什么</td><td>答辩报告可一键写入待办，带优先级</td></tr>
-        <tr><td><strong>复盘笔记 / 设置</strong></td><td>怎么调、怎么备份</td><td>自由笔记；引擎切换、API 配置、提示词工坊、JSON 备份</td></tr>
+        <tr><td>求职主线</td><td><strong>首页</strong></td><td>我现在该做什么</td><td>今日待办、当前岗位与简历、匹配分、下一步动作建议</td></tr>
+        <tr><td>求职主线</td><td><strong>求职流程</strong></td><td>整条路走到哪了</td><td>五步向导 + 进度指示灯，点击可直达对应视图</td></tr>
+        <tr><td>求职主线</td><td><strong>岗位库</strong></td><td>这份 JD 到底要什么</td><td>顶部「岗位雷达」按六个技术方向 × 四类企业抓公开岗位，卡片列表与详情弹窗，勾选批量入库；JD 自动分段、技能标签、设为当前目标；上传 .docx / PDF / 截图；每张卡片带「一键投递」；未投 / 已投 + 行业双筛选；公告类自动进入「补 JD」向导</td></tr>
+        <tr><td>求职主线</td><td><strong>投递看板</strong></td><td>投到哪一步了</td><td>按阶段分列，卡片可拖动改阶段并写入时间线；顶部统计当前分布，避免「投了一堆但记不清进度」</td></tr>
+        <tr><td>求职主线</td><td><strong>截止日历</strong></td><td>哪个快到期</td><td>月历上两色条：红条是岗位截止日，蓝条是你自己定的下一步</td></tr>
+        <tr><td>求职主线</td><td><strong>简历库</strong></td><td>我手里有哪些版本</td><td>多份简历、逐段编辑、一键复制全文；上传 .docx / PDF / 截图自动拆字段；荣誉独立成栏</td></tr>
+        <tr><td>求职主线</td><td><strong>匹配分析</strong></td><td>差多少、差在哪</td><td>覆盖率 70 + 经验 15 + 量化 15、ATS 六项、缺口清单、一键按岗位改写、只读「简历阅览」</td></tr>
+        <tr><td>面试演练</td><td><strong>模拟面试</strong></td><td>我答得怎么样</td><td>对话式 / 逐题训练两种模式，8 阶段状态机，即时点评与四维评分</td></tr>
+        <tr><td>面试演练</td><td><strong>反问助手</strong></td><td>最后五分钟问什么</td><td>六组问题、按缺口定制、五条禁区、一键复制</td></tr>
+        <tr><td>复盘沉淀</td><td><strong>本周周报</strong></td><td>这周到底做了什么</td><td>只统计本机记录：投递、面试、待办完成情况；不联网、不上报</td></tr>
+        <tr><td>复盘沉淀</td><td><strong>复盘待办</strong></td><td>下一步补什么</td><td>答辩报告可一键写入待办，带优先级与完成状态</td></tr>
+        <tr><td>复盘沉淀</td><td><strong>复盘笔记</strong></td><td>想法存在哪</td><td>面试复盘、话术卡、公司研究，自由记录</td></tr>
+        <tr><td>偏好</td><td><strong>帮助中心</strong></td><td>怎么用、边界在哪</td><td>三分钟上手、数据存在哪、哪些事它不会替你做；可重看新手引导</td></tr>
+        <tr><td>偏好</td><td><strong>设置</strong></td><td>怎么调、怎么备份</td><td>引擎切换、API 与 Key 保险箱、提示词工坊、本机档案、JSON 备份导入导出</td></tr>
       </tbody>
     </table>
   </div>
@@ -306,7 +405,7 @@ flowchart LR
 </section>
 
 <section>
-  <h2>四、简历改造：匹配分是算出来的，不是猜的</h2>
+  <h2>六、简历改造：匹配分是算出来的，不是猜的</h2>
   <p>没有配置 API Key 时，整套打分由本地引擎完成：先把 JD 拆成「岗位职责 / 任职要求 / 加分项」，再把简历里的技能、年限、量化表达逐项对齐。它不追求语义理解，追求<mark class="key">可解释、可复算、每次结果一致</mark>。</p>
 
   <div class="formula">
@@ -319,7 +418,7 @@ flowchart LR
   </div>
 
   <figure class="chart-figure">
-    <figcaption>图 2　示例岗位（高级数据分析师）的 89 分拆解 <em>技能覆盖 84% → 58.8 分，经验与量化均满分</em></figcaption>
+    <figcaption>图 3　示例岗位（高级数据分析师）的 89 分拆解 <em>技能覆盖 84% → 58.8 分，经验与量化均满分</em></figcaption>
     <div id="chart-match" style="width:100%;min-height:320px"></div>
     <div class="desc">三段满分合计 100。示例中唯一明显的失分在技能覆盖：JD 要求的两项工具在简历里没有对应证据，这正好是改写建议要处理的部分。</div>
   </figure>
@@ -349,7 +448,7 @@ flowchart LR
 
 
 <section>
-  <h2>五、模拟面试：八阶段状态机 + 四维评分</h2>
+  <h2>七、模拟面试：八阶段状态机 + 四维评分</h2>
   <p>面试不是一串随机问题。状态机按真实面试的节奏推进，前面的回答会影响后面的追问方向。</p>
   <div class="table-wrap">
     <table>
@@ -373,7 +472,7 @@ flowchart LR
   </div>
 
   <figure class="chart-figure">
-    <figcaption>图 3　一次 61 分答辩的四维雷达 <em>结构完整与表达清晰较强，内容相关是主要短板</em></figcaption>
+    <figcaption>图 4　一次 61 分答辩的四维雷达 <em>结构完整与表达清晰较强，内容相关是主要短板</em></figcaption>
     <div id="chart-radar" style="width:100%;min-height:380px"></div>
     <div class="desc">数据来自端到端验证时的一段真实作答（268 字，含时间、数字与个人动作）：内容相关 10/25、结构完整 18/25、证据量化 16/25、表达清晰 22/25。按上方公式加权后为 61 分，可手工复算。</div>
   </figure>
@@ -385,7 +484,7 @@ flowchart LR
 </section>
 
 <section>
-  <h2>六、反问助手：把最后五分钟变成信息收集</h2>
+  <h2>八、反问助手：把最后五分钟变成信息收集</h2>
   <p>面试官问「你还有什么想了解的吗」，本质上是在看三件事：你关不关心这份工作、有没有认真准备、以及你判断机会的标准是否成熟。工具按六个方向生成问题，每条都带「为什么值得问」的说明。</p>
   <div class="pgrid">
     <div class="prompt"><b>岗位与目标</b><small>这个岗位设立的原因、半年内最重要的交付、成功的衡量方式。</small></div>
@@ -407,7 +506,7 @@ flowchart LR
 </section>
 
 <section>
-  <h2>七、双模式 AI：有 Key 直连，没 Key 也能跑</h2>
+  <h2>九、双模式 AI：有 Key 直连，没 Key 也能跑</h2>
   <p>单文件网页不可能自带大模型，所以设计成两条路：</p>
   <div class="table-wrap">
     <table>
@@ -434,17 +533,37 @@ flowchart LR
       </tbody>
     </table>
   </div>
+
+  <h3>API Key 保险箱（v2.5 新增）</h3>
+  <p>把 Key 明文放在 <code>localStorage</code> 里，任何拿到这台设备的人打开开发者工具就能读走。保险箱要解决的就是这一步：<strong>落盘的只有密文</strong>，解密的钥匙不写盘。</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th style="width:20%">环节</th><th style="width:30%">做法</th><th>说明</th></tr></thead>
+      <tbody>
+        <tr><td><strong>口令派生</strong></td><td>PBKDF2-SHA256，150,000 次</td><td>每次加密生成新的随机盐，盐与迭代次数随密文一起存，口令本身不落盘</td></tr>
+        <tr><td><strong>加密算法</strong></td><td>AES-256-GCM</td><td>带认证标签，密文被改动会在解密时报错，而不是解出一段错误内容</td></tr>
+        <tr><td><strong>存放位置</strong></td><td><span class="mono">settings.apiKeyVault</span></td><td>结构为 <code>{app,kind,v,enc,kdf:{name,hash,iter,salt},iv,data}</code></td></tr>
+        <tr><td><strong>明文处理</strong></td><td>加密后立即删除</td><td>写入保险箱后执行 <code>delete settings.apiKey</code>，本地只留密文</td></tr>
+        <tr><td><strong>会话密钥</strong></td><td>只在内存</td><td>解锁后仅本次会话可用，刷新页面即回到锁定状态，需要重新输入口令</td></tr>
+        <tr><td><strong>忘记口令</strong></td><td>只能移除后重填</td><td>不提供找回；移除保险箱不影响岗位、简历与面试记录</td></tr>
+        <tr><td><strong>备份</strong></td><td>不含 Key，也不含密文</td><td>导出时同时删除 <code>apiKey</code> 与 <code>apiKeyVault</code>；导入时保留本机原保险箱，不被外部文件覆盖</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="callout blue">
+    <b>边界写清楚：</b>保险箱防的是「拿到本机存储或备份文件的人直接读到 Key」；它不防已经控制了你当前浏览器会话的人——解锁状态下发起请求，密钥必然在内存里。公用电脑上最稳妥的做法仍然是不填 Key，用完清空当前档案。
+  </div>
 </section>
 
 <section>
-  <h2>八、验证记录</h2>
-  <p>交付前用真实浏览器把主路径完整走了一遍，并在每一步读取控制台。以下是可复现的结论，而不是「应该没问题」。</p>
+  <h2>十、验证记录</h2>
+  <p>验证分三层：<strong>本地浏览器</strong>走主路径并逐步读控制台；<strong>代码层</strong>做拆分前后逐路由比对；<strong>线上层</strong>在 GitHub Pages 上复验资源与缓存切换。下表中 <strong>1–53 是 v1.4 基线</strong>，其结论沿用当时的实测记录，本轮未逐条重跑；<strong>54–65 是本轮（v2.5）实测</strong>，可直接对照当前提交。</p>
   <div class="table-wrap">
     <table>
       <thead><tr><th style="width:6%">#</th><th style="width:28%">验证项</th><th style="width:12%">结果</th><th>证据</th></tr></thead>
       <tbody>
         <tr><td>1</td><td>首页加载与首屏数据</td><td><span class="tag ok">PASS</span></td><td>示例岗位与简历自动注入，匹配分与下一步动作正常显示</td></tr>
-        <tr><td>2</td><td>10 个导航入口逐个切换</td><td><span class="tag ok">PASS</span></td><td>无空白页、无渲染中断，侧栏选中态跟随</td></tr>
+        <tr><td>2</td><td>14 个导航入口逐个切换</td><td><span class="tag ok">PASS</span></td><td>无空白页、无渲染中断，侧栏选中态与 <code>aria-current</code> 跟随；第 15 个可聚焦元素为搜索按钮</td></tr>
         <tr><td>3</td><td>匹配分析</td><td><span class="tag ok">PASS</span></td><td>匹配分 89/100、技能覆盖率 84%，ATS 六项与改写建议齐全</td></tr>
         <tr><td>4</td><td>勾选建议生成定制版</td><td><span class="tag ok">PASS</span></td><td>采纳后重渲染，未采纳项保持原样</td></tr>
         <tr><td>5</td><td>模拟面试提交与追问</td><td><span class="tag ok">PASS</span></td><td>提交 STAR 回答后进度变为「已答 1 / 8」，自动进入项目深挖</td></tr>
@@ -452,7 +571,7 @@ flowchart LR
         <tr><td>7</td><td>反问清单与复制</td><td><span class="tag ok">PASS</span></td><td>六组卡片与「别这样问」清单存在；复制失败时给出明确提示</td></tr>
         <tr><td>8</td><td>设置页与提示词工坊</td><td><span class="tag ok">PASS</span></td><td>8 条提示词可生成，弹窗文本框内容完整</td></tr>
         <tr><td>9</td><td>控制台</td><td><span class="tag ok">PASS</span></td><td>全程 0 条 error 级消息（favicon 已内联，无 404）</td></tr>
-        <tr><td>10</td><td>脚本语法</td><td><span class="tag ok">PASS</span></td><td>整段脚本通过解析：258,178 字符，1 个 script 块（整份 HTML 326,930 字符 / 370,642 字节）</td></tr>
+        <tr><td>10</td><td>脚本语法与拆分</td><td><span class="tag ok">PASS</span></td><td>15 个分片逐个通过解析，合计 394,716 B；<code>index.html</code> 3,466 B、15 个 <code>defer</code> 按 01→15 顺序引用；拆分前单块为 397,341 B</td></tr>
         <tr><td>11</td><td>JD 上传 .docx</td><td><span class="tag ok">PASS</span></td><td>中文标题、岗位职责、任职要求完整提取；预览确认后填入</td></tr>
         <tr><td>12</td><td>简历上传 .docx</td><td><span class="tag ok">PASS</span></td><td>简历弹窗同一解析器可用，填入后可继续点「回填到上方各栏」</td></tr>
         <tr><td>13</td><td>上传含文字层 PDF</td><td><span class="tag ok">PASS</span></td><td>11 行简历文本逐行提取，未触发乱码告警</td></tr>
@@ -485,9 +604,9 @@ flowchart LR
         <tr><td>40</td><td>备份剔除 API Key</td><td><span class="tag ok">PASS</span></td><td>本机写入 <code>sk-SECRET-TEST</code> 后导出，明文备份 JSON 内检索该串为 <code>false</code>（<code>exportHasApiKey=false</code>）；加密备份密文内同样检索不到；备份带 <code>__meta</code>（应用名 / 版本 / 时间 / 档案名），导入时该字段被剥除</td></tr>
         <tr><td>41</td><td>加密备份往返与错误密码</td><td><span class="tag ok">PASS</span></td><td>PBKDF2-SHA256 150,000 次派生 + AES-256-GCM，密文头为 <code>{app,enc:"AES-256-GCM",v:1,kdf:{salt,iter},iv,data}</code>；同密码解密后 <code>jobs</code> 仍为数组、<code>__meta.app</code> 正确、不含 apiKey；换错误密码抛 <code>OperationError</code> 被捕获并提示，不产生半截数据</td></tr>
         <tr><td>42</td><td>导入备份保留本机 Key</td><td><span class="tag ok">PASS</span></td><td>解密得到的 <code>jobs</code> 直接走 <code>importPayload</code>：本机原 Key 保留且 <code>engine</code> 自动置 <code>api</code>，<code>privacyAck</code> 置 <code>true</code>（不会重复弹首次说明）；非备份文件（无 <code>jobs</code> 数组）返回 <code>false</code> 且不改动现有数据</td></tr>
-        <tr><td>43</td><td>本机档案隔离</td><td><span class="tag ok">PASS</span></td><td>写入 <code>jobseeker-workbench-v1::px</code> 后回读 <code>::p1</code>：无标记且长度不变（<code>p1LeakedMarker=false</code>、<code>p1LenUnchanged=true</code>）；<code>setActivePid</code> 切换后 <code>storeKey()</code> 分别指向 <code>::px</code> / <code>::p1</code>，顶栏档案名同步为「我的档案」；旧版单键 <code>jobseeker-workbench-v1</code> 自动迁移到 <code>::p1</code> 且原键已清理</td></tr>
+        <tr><td>43</td><td>本机档案隔离</td><td><span class="tag ok">PASS</span></td><td>存储键为 <code>qicheng-v2::&lt;档案ID&gt;</code>：写入 <code>::px</code> 后回读 <code>::p1</code> 无标记且长度不变（<code>p1LeakedMarker=false</code>、<code>p1LenUnchanged=true</code>）；<code>setActivePid</code> 切换后 <code>storeKey()</code> 分别指向 <code>::px</code> / <code>::p1</code>，顶栏档案名同步；旧版单键 <code>qicheng-v1</code> 自动迁移到 <code>::p1</code> 且原键已清理</td></tr>
         <tr><td>44</td><td>手机视口（456px）</td><td><span class="tag ok">PASS</span></td><td><code>body min-width</code> 由 1000px 归零，横向溢出为 <code>-14</code>（无滚动条）；顶栏 <code>display:flex</code>、主区左外边距 0；点汉堡后侧栏左边缘 0、遮罩 <code>opacity:1 / pointer-events:auto</code>，点遮罩后侧栏回到 -278、遮罩归 0；设置页六条隐私行折叠为单列（376px），按钮整行排列不重叠</td></tr>
-        <tr><td>45</td><td>桌面视口（1165px）回归</td><td><span class="tag ok">PASS</span></td><td>顶栏隐藏、侧栏常驻 258px、<code>min-width</code> 仍为 1000px，隐私行维持 132px + 640px 两列；两视口控制台均无 error（仅剩 1 条无障碍提示，已为三处设置输入补 <code>for/id</code> 关联）</td></tr>
+        <tr><td>45</td><td>桌面视口（1165px）回归</td><td><span class="tag ok">PASS</span></td><td>顶栏隐藏、侧栏常驻 258px、<code>min-width</code> 仍为 1000px，隐私行维持 132px + 640px 两列；两视口控制台均无 error、无 warning，无障碍提示 0 条（搜索按钮可访问名改取可见文本、<code>aria-current</code> 标注、设置输入 <code>for/id</code> 关联、弹窗焦点环 + Esc）</td></tr>
         <tr><td>46</td><td>一键投递：官网链接直达</td><td><span class="tag ok">PASS</span></td><td>岗位带 <code>url=https://careers.example.com/job/123</code> 时，点卡片「一键投递」确认后在新标签打开该地址；记录写入 <code>status=已投递</code>、<code>applyMethod=官网链接</code>、<code>applyUrl</code> 与 1 条 <code>applyLog</code>；卡片徽章变「已投 10-23」、按钮变「再投一次」，筛选计数从「未投递 3 / 已投递 0」刷新为「未投递 2 / 已投递 1」</td></tr>
         <tr><td>47</td><td>一键投递：公告原文先确认</td><td><span class="tag ok">PASS</span></td><td>只有 <code>srcUrl</code>（校招公告页）时不直接跳走：弹窗说明「公告页里有网申入口或投递邮箱」并给出补详情页的输入框；点「打开并记为已投」前记录保持 <code>status=在投 / log=0</code>，点击后打开公告页、<code>applyMethod=公告原文</code>、<code>log=1</code></td></tr>
         <tr><td>48</td><td>一键投递：无链接与 JD 内链接</td><td><span class="tag ok">PASS</span></td><td>JD 正文里带链接时按「JD 里的链接」直接确认并打开（<code>applyUrl=https://jobs.example.com/a/77</code>）；三者都没有时弹出三条出路（填链接 / 必应搜索 / 复制投递素材），不写投递记录也不改状态，避免误以为已投</td></tr>
@@ -496,6 +615,18 @@ flowchart LR
         <tr><td>51</td><td>行业归类与手动指定</td><td><span class="tag ok">PASS</span></td><td>新建岗位不选行业、JD 含「SoC 芯片 / Verilog / UVM」时自动归入「电子/半导体」，库里 <code>industry=""</code>（保留自动判断）；编辑时把「恒瑞医药」的岗位手动改为「金融」，保存后 <code>industry=金融</code>、chip 行同步出现「金融 1」且「医药/医疗」消失；详情副标题显示「恒瑞医药 · 上海 · 20-30K · 金融」；弹窗「自动判断（…）」提示随公司名 / JD 输入实时更新为「电子/半导体」，手动选中后不会被输入覆盖；手机 456px 下 chip 行宽 416px、换行不溢出（<code>overflowX=0</code>）</td></tr>
         <tr><td>52</td><td>雷达卡片改版（对齐招聘站列表）</td><td><span class="tag ok">PASS</span></td><td>1280px 下 60 张卡片：标题 15px / 800、右侧红色高亮、标签 11.5px 圆角、公司行含 22px 首字 logo；同一信息只出现一次（批次已在高亮位就不再重复成标签，行业与公司行重复时只留一处）；右侧「加入 / 原文」同一行、「查看详情 →」在下方；列表在 430px 内滚动，页面 <code>overflowX=0</code>；已在库条目显示「已在库」徽章且不再出现「加入」按钮</td></tr>
         <tr><td>53</td><td>点击卡片查看岗位详情</td><td><span class="tag ok">PASS</span></td><td>点卡片打开 780px 弹窗：标题 + 高亮、图标 meta 行、左栏「职位信息」8 项事实、右栏「公司信息」卡与关键词；点勾选框 / 「原文」不触发弹窗（overlay 数保持 0），聚焦后按 Enter 可打开；未入库详情点「加入岗位库」→ 岗位数 +1、详情关闭并弹出「补 JD」向导；已入库条目按钮变为「查看已入库岗位」，点击后打开该岗位详情（标题一致）；示例条目无原文链接、标题带「示例」；≤900px 详情单列，456px 下弹窗 428px、内部滚动 0</td></tr>
+        <tr><td>54</td><td>拆分前后逐路由等价</td><td><span class="tag ok">PASS</span></td><td>15 条路由的渲染节点数完全一致：home 139 / flow 94 / jobs 366 / board 95 / calendar 132 / resume 59 / match 243 / interview 41 / reverse 169 / week 72 / todo 140 / note 82 / help 109 / settings 226 / jobs/j-demo 1701</td></tr>
+        <tr><td>55</td><td>资源引用完整性</td><td><span class="tag ok">PASS</span></td><td>页面引用的 19 个资源全部 200（15 个分片 + <code>app.css</code> + 图标 + manifest），首页横幅 1/1，无 404</td></tr>
+        <tr><td>56</td><td>GitHub Pages 发布</td><td><span class="tag ok">PASS</span></td><td><span class="mono">https://jixu789.github.io/jobseeker-workbench/</span> 返回 200，<code>Content-Length: 3466</code>、<code>Last-Modified: Sat, 24 Oct 2026 15:23:32 GMT</code>，页面含 15 个 <code>script</code></td></tr>
+        <tr><td>57</td><td>线上网络请求</td><td><span class="tag ok">PASS</span></td><td>桌面与手机两轮访问，<code>responseStatus ≥ 400</code> 的请求 0 个</td></tr>
+        <tr><td>58</td><td>线上控制台</td><td><span class="tag ok">PASS</span></td><td>console 消息 0 error / 0 warn</td></tr>
+        <tr><td>59</td><td>Service Worker 生效</td><td><span class="tag ok">PASS</span></td><td><code>swReg=true</code>、<code>swController=true</code>，缓存名 <code>qicheng-shell-v4</code>，预缓存 23 项；断网刷新仍能打开首页</td></tr>
+        <tr><td>60</td><td>搜索按钮可访问名</td><td><span class="tag ok">PASS</span></td><td><code>#nav-search</code> 的 <code>aria-label</code> 为 <code>null</code>，可访问名直接取可见文本「搜索 Ctrl K」，与视觉文本一致</td></tr>
+        <tr><td>61</td><td>暗色主题残留</td><td><span class="tag ok">PASS</span></td><td><code>data-theme</code> 为 <code>null</code>、<code>window.applyTheme</code> 为 <code>undefined</code>；15 个分片 + <code>app.css</code> + <code>index.html</code> 中 <code>prefers-color-scheme</code> 命中 0 处</td></tr>
+        <tr><td>62</td><td>PWA manifest</td><td><span class="tag ok">PASS</span></td><td><code>manifest.webmanifest</code> 1,092 B，name / short_name / start_url / display / theme_color / icons 齐全，含 192 与 512 两个尺寸</td></tr>
+        <tr><td>63</td><td>移动端横向溢出</td><td><span class="tag ok">PASS</span></td><td>390px 视口下 <code>scrollWidth − clientWidth = −15</code>，无横向滚动条</td></tr>
+        <tr><td>64</td><td>Pages 边缘缓存切换</td><td><span class="tag ok">PASS</span></td><td>推送后首次请求仍是旧内容 370,642 B；加时间戳查询串重取后为 3,466 B、<code>ETag "6adccd74-d8a"</code>，确认已切到 v2.5</td></tr>
+        <tr><td>65</td><td>二进制资源上传</td><td><span class="tag ok">PASS</span></td><td>3 个 PNG 与 1 张 JPG 通过 git 对象上传（不是把字符串塞进 API），线上均 200 且 <code>Content-Type</code> 正确</td></tr>
       </tbody>
     </table>
   </div>
@@ -505,7 +636,7 @@ flowchart LR
 </section>
 
 <section>
-  <h2>九、分享给好友，与四道隐私边界</h2>
+  <h2>十一、分享给好友，与五道隐私边界</h2>
   <p class="lead">这份工作台没有账号、没有服务器，分享方式也因此很朴素：<strong>把链接发出去，每个人在自己的浏览器里各存一份</strong>。数据隔离由浏览器本身完成，不靠后台权限校验——因为根本不存在能读到别人数据的后台。</p>
 
   <h3>1. 好友打开看到的是什么</h3>
@@ -521,21 +652,22 @@ flowchart LR
   </div>
   <p>反过来说，<strong>你也看不到对方的</strong>：内容存在对方设备的浏览器里，既不上传也没有互相读取的通道。</p>
 
-  <h3>2. 四道边界，以及它们各自防的是什么</h3>
+  <h3>2. 五道边界，以及它们各自防的是什么</h3>
   <div class="table-wrap">
     <table>
       <thead><tr><th style="width:20%">边界</th><th style="width:26%">防的问题</th><th>落地方式</th></tr></thead>
       <tbody>
         <tr><td><strong>搜索引擎收录</strong></td><td>公开链接被爬虫抓走，出现在搜索结果里</td><td><code>meta robots</code> 设 <code>noindex,nofollow,noarchive</code></td></tr>
         <tr><td><strong>来源地址外泄</strong></td><td>点外链时浏览器把当前页地址作为 Referer 带出去</td><td><code>meta referrer</code> 设 <code>no-referrer</code></td></tr>
-        <tr><td><strong>API Key 随文件外流</strong></td><td>把备份发给别人，密钥跟着走</td><td>导出前深拷贝并删除 <code>settings.apiKey</code>，明文与加密备份都不含 Key</td></tr>
+        <tr><td><strong>API Key 随文件外流</strong></td><td>把备份发给别人，密钥跟着走</td><td>导出前深拷贝并删除 <code>settings.apiKey</code> 与 <code>settings.apiKeyVault</code>，明文与加密备份都不含 Key、也不含保险箱密文</td></tr>
+        <tr><td><strong>本机 Key 明文可读</strong></td><td>拿到这台设备的人打开开发者工具就能读到 Key</td><td>Key 保险箱：PBKDF2-SHA256 150,000 次派生 + AES-256-GCM，本地只存密文，明文即时删除</td></tr>
         <tr><td><strong>备份文件被翻看</strong></td><td>简历含手机号、邮箱、原公司，明文文件谁拿到都能读</td><td>加密备份：PBKDF2-SHA256 150,000 次派生 + AES-256-GCM，密码不落盘</td></tr>
       </tbody>
     </table>
   </div>
 
   <h3>3. 共用设备怎么办</h3>
-  <p>浏览器的本地存储以「设备 + 浏览器」为单位，同一台电脑上的同一个浏览器只有一份数据。所以内置了<strong>本机档案</strong>：在设置页新建几份档案，存储键从 <code>jobseeker-workbench-v1</code> 变为 <code>jobseeker-workbench-v1::档案ID</code>，切换时整页重载，内存里的旧数据不会残留。旧版本的单键数据会自动迁移到第一份档案，升级不丢内容。</p>
+  <p>浏览器的本地存储以「设备 + 浏览器」为单位，同一台电脑上的同一个浏览器只有一份数据。所以内置了<strong>本机档案</strong>：在设置页新建几份档案，存储键从 <code>qicheng-v2</code> 变为 <code>qicheng-v2::档案ID</code>，切换时整页重载，内存里的旧数据不会残留。旧版本的单键数据会自动迁移到第一份档案，升级不丢内容。</p>
   <div class="callout blue">
     <b>分工建议：</b>自己用一份档案；借电脑给家人朋友时让对方另建一份，或直接开无痕窗口；公用机房电脑不要填 API Key，用完点「清空当前档案」。
   </div>
@@ -544,38 +676,41 @@ flowchart LR
   <p>微信内置浏览器能正常打开，但它有两条不太友好的规则：一是清理微信缓存会把内置浏览器的本地数据一起清掉；二是转发链接后地址容易被二次包装。所以页面检测到 <code>MicroMessenger</code> 时会在底部提示「右上角 → 在浏览器打开」，并说明缓存清理的风险。这一步<strong>只能引导，不能强制跳转</strong>——微信不允许网页自行唤起外部浏览器。</p>
   <p>相应地，界面在 900px 以下切换为移动布局：侧栏收成抽屉、顶栏常驻、栅格折叠为单列，456px 宽度下实测无横向溢出。</p>
 
-  <h3>5. 网络请求只有两类</h3>
+  <h3>5. 网络请求只有三类</h3>
   <ul>
     <li>你自己填的 AI 接口（不填就完全不发）。</li>
     <li>岗位雷达向 jsDelivr 拉取公开岗位公告数据（只读取，不提交任何个人信息）。</li>
+    <li>站点自身的静态资源（首次加载与 Service Worker 更新时），发往 GitHub Pages，不发往任何第三方。</li>
   </ul>
   <p>没有统计、没有广告、没有第三方脚本，也没有任何形式的使用行为上报。</p>
 </section>
 
 <section>
-  <h2>十、使用前需要知道的三件事</h2>
+  <h2>十二、使用前需要知道的三件事</h2>
   <h3>1. 数据只在这台设备的这个浏览器里</h3>
   <p>所有岗位、简历、面试记录都保存在浏览器的本地存储中，没有云端、没有账号、没有同步。<strong>换电脑、换浏览器、清除浏览记录，之前填的内容就没了。</strong>设置页提供「导出备份」，重要内容建议定期导出；同一设备多人使用时用「本机档案」分开。</p>
+  <p>「安装为应用」（PWA）只是把入口放到桌面或开始菜单，<strong>存储位置不变</strong>；清除浏览器站点数据同样会删除这些内容，安装与否都一样。</p>
   <h3>2. API Key 也只在你本地</h3>
-  <p>Key 同样只存在本地浏览器，请求从你的浏览器直接发往你填写的服务地址，不经过任何中间服务器；备份文件里不含 Key。公用电脑上不建议保存，用完可在设置页清空。</p>
+  <p>Key 同样只存在本地浏览器，请求从你的浏览器直接发往你填写的服务地址，不经过任何中间服务器；备份文件里不含 Key。设置了保险箱时，落盘的是密文而不是 Key 本身，刷新后需要重新输入口令解锁。公用电脑上不建议保存，用完可在设置页清空。</p>
   <h3>3. 它是练习工具，不是录取预测</h3>
   <p>匹配分与答辩分用来横向比较不同岗位、不同版本的简历，以及观察自己的进步趋势，不代表企业的真实筛选结果。所有改写建议在采用前，请确认每一句都经得起追问。</p>
 </section>
 
 <section>
-  <h2>十一、三步上手</h2>
+  <h2>十三、三步上手</h2>
   <div class="steps">
     <div class="step"><span class="no">01</span><h4>先往岗位库里放几个真岗位</h4><p>打开「岗位库」，顶部「岗位雷达」按方向 / 企业 / 城市筛一筛，勾选后批量加入；公告类会自动进入「补 JD」向导，能直连的就自动填好，不能的就点「打开原文」粘贴正文，两栏拆好后再保存。也可以新建一条，把 JD 上传或粘进去。再去「简历库」上传你的简历，替换示例数据。</p></div>
     <div class="step"><span class="no">02</span><h4>先看分，再改简历</h4><p>进「匹配分析」看缺口，点「一键改写简历」按岗位整体调一版，或勾选具体建议再生成定制版；改完用旁边的「简历阅览」通读。</p></div>
-    <div class="step"><span class="no">03</span><h4>练一场，带走三个问题</h4><p>用「逐题训练」热身，再开一场「对话式」完整演练；结束后把反问清单里的两三个问题记进待办。</p></div>
+    <div class="step"><span class="no">03</span><h4>练一场，投一版，周末复盘</h4><p>用「逐题训练」热身，再开一场「对话式」完整演练；结束后把反问清单里的两三个问题记进待办。投递后在「投递看板」把卡片拖到对应阶段，周五打开「本周周报」看这一周投了几份、面了几场。</p></div>
   </div>
 </section>
 
 </main>
 
 <footer>
-  <b>求职作战室 v1.4</b> · 单文件离线工作台，基于个人工作台模板改造，报告由 HTML 报告脚手架生成。<br>
-  交付物：<span class="mono">jobseeker-workbench/jobseeker-workbench.html</span> + <span class="mono">assets/greet-banner.jpg</span> · 本报告：<span class="mono">jobseeker-report/jobseeker-report.html</span>
+  <b>启程 v2.5</b> · 多文件静态站点（15 个脚本分片 + PWA），数据只在本机浏览器。<br>
+  在线地址：<span class="mono">https://jixu789.github.io/jobseeker-workbench/</span><br>
+  交付物：<span class="mono">index.html</span> + <span class="mono">assets/css/app.css</span> + <span class="mono">assets/js/parts/*.js</span> + <span class="mono">manifest.webmanifest</span> + <span class="mono">sw.js</span> · 本报告：<span class="mono">report.html</span>
 </footer>
 
 </article>

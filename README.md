@@ -5,7 +5,7 @@
 ## 在线访问
 
 - 工作台：<https://jixu789.github.io/jobseeker-workbench/>
-- 产品说明与验证报告（v1.4 单文件基线）：<https://jixu789.github.io/jobseeker-workbench/report.html>
+- 产品说明与验证报告（v2.5）：<https://jixu789.github.io/jobseeker-workbench/report.html>
 
 ## 它解决什么
 
@@ -31,7 +31,7 @@
 - `assets/js/parts/01-core.js` … `15-boot.js`：按功能划分的 15 个分片——核心配置与图标 / 数据层 / 检索 / UI 基础件 / 岗位 / 简历 / 导入 / 匹配 / AI / 设置 / 密钥库 / 面试 / 复盘 / 看板 / 启动
 - `manifest.webmanifest`、`sw.js`：PWA 清单与离线缓存（缓存名 `qicheng-shell-v4`，预缓存全部 15 个分片）
 - `assets/icons/`、`assets/img/`：图标与首页横幅
-- `report.html`：产品说明与验证报告（v1.4 时的单文件版本，ECharts / Mermaid 已本地化到 `_shared/`）
+- `report.html`：产品说明与验证报告（v2.5，含 15 个分片的结构与部署说明；ECharts / Mermaid 已本地化到 `_shared/`）
 - `.nojekyll`：GitHub Pages 走纯静态托管，避免 Jekyll 忽略 `_shared` 这类下划线目录
 
 ## 更新记录

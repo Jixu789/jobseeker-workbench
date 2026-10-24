@@ -5,7 +5,7 @@
 ## 在线访问
 
 - 工作台：<https://jixu789.github.io/jobseeker-workbench/>
-- 产品说明与验证报告：<https://jixu789.github.io/jobseeker-workbench/report.html>
+- 产品说明与验证报告（v1.4 单文件基线）：<https://jixu789.github.io/jobseeker-workbench/report.html>
 
 ## 它解决什么
 
@@ -18,13 +18,23 @@
 
 ## 使用
 
-直接用浏览器打开 `index.html` 即可，无需构建、无需后端；数据只存在本机 `localStorage`（key `jobseeker-workbench-v1`）。
+打开页面即可，无需构建、无需后端；数据只存在本机 `localStorage`（key `qicheng-v2::<档案ID>`，默认 `qicheng-v2::p1`），同一浏览器可建多份档案互相隔离。
 
 - 岗位雷达可批量导入公告类岗位，导入后自动进入「补 JD」向导：先试一次直连抓原文，失败则手动粘贴，本地拆分「岗位职责 / 任职要求」两栏。
 - 配置 OpenAI 兼容 API 后，简历的工作经历 / 项目经历改由模型按原文抽取；未配置时按本地规则拆分。
+- 以 `http(s)` 打开时注册 Service Worker，断网后仍可打开（`file://` 下自动跳过注册）。
 
 ## 仓库说明
 
-- `index.html`：工作台（单文件）
-- `report.html`：产品说明与验证报告（ECharts / Mermaid 已本地化到 `_shared/`）
+- `index.html`：页面外壳，15 个脚本按文档顺序 `defer` 加载
+- `assets/css/app.css`：全部样式与主题变量（仅浅色）
+- `assets/js/parts/01-core.js` … `15-boot.js`：按功能划分的 15 个分片——核心配置与图标 / 数据层 / 检索 / UI 基础件 / 岗位 / 简历 / 导入 / 匹配 / AI / 设置 / 密钥库 / 面试 / 复盘 / 看板 / 启动
+- `manifest.webmanifest`、`sw.js`：PWA 清单与离线缓存（缓存名 `qicheng-shell-v4`，预缓存全部 15 个分片）
+- `assets/icons/`、`assets/img/`：图标与首页横幅
+- `report.html`：产品说明与验证报告（v1.4 时的单文件版本，ECharts / Mermaid 已本地化到 `_shared/`）
 - `.nojekyll`：GitHub Pages 走纯静态托管，避免 Jekyll 忽略 `_shared` 这类下划线目录
+
+## 更新记录
+
+- v2.5（2026-10-24）：单文件拆为 15 个分片（拼回后与拆分前的单文件逐字节等价）；移除暗色主题，只保留浅色；修复搜索按钮的可访问名（Lighthouse 无障碍 47 项通过、仅剩刻意的 `is-crawlable`）；新增 PWA 离线，断网重载仍可渲染。
+- v1.4（2026-10-23）：岗位雷达改卡片式列表，点击查看岗位详情。

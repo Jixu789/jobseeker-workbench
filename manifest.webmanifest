@@ -1,0 +1,24 @@
+{
+  "name": "启程 · 求职工作台",
+  "short_name": "启程",
+  "description": "本地优先的求职工作台：岗位管理、简历改写、模拟面试、投递看板与周报复盘。",
+  "lang": "zh-CN",
+  "start_url": "./index.html#/home",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F7F4EF",
+  "theme_color": "#141C2B",
+  "categories": ["productivity", "business"],
+  "icons": [
+    { "src": "assets/icons/qicheng-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/qicheng-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/qicheng-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/icons/qicheng.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "投递看板", "url": "./index.html#/board" },
+    { "name": "截止日历", "url": "./index.html#/calendar" },
+    { "name": "本周周报", "url": "./index.html#/week" }
+  ]
+}

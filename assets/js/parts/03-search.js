@@ -716,9 +716,18 @@ async function runOneClickRewrite(m,job,res){
   }
   const diff=rwDiff(res,next);
   if(!diff.length) return null;
-  next.id=uid("r"); next.parentId=res.id; next.createdAt=nowISO(); next.updatedAt=nowISO();
+  const baseId=(res.parentId&&res.jobId===job.id)?res.parentId:res.id;
+  next.id=uid("r"); next.parentId=baseId; next.jobId=job.id; next.tailored=true;
+  next.createdAt=nowISO(); next.updatedAt=nowISO();
+  delete next.demo;
   next.name=rwName(res,job);
-  data.resumes.unshift(next); data.activeResumeId=next.id; store.save();
+  data.resumes.unshift(next); data.activeResumeId=next.id;
+  /* 把这份版本登记到该岗位的定制会话，岗位与版本一一关联，互不覆盖 */
+  data.tailor=data.tailor||{};
+  data.tailor[job.id]={jobId:job.id,baseResumeId:baseId,versionId:next.id,
+    decisions:{},inputs:{},edits:{},variants:{},createdAt:nowISO(),updatedAt:nowISO()};
+  tailorSyncJob(job,data.tailor[job.id]);
+  store.save();
   const after=runMatch(job.id,next.id);
   openRewriteResult({src:res,next,before:m,after,diff,ai});
   render();

@@ -9,6 +9,7 @@ function ensureShape(){
   data.note = data.note || [];
   data.settings = Object.assign({ engine:"local", baseUrl:"https://api.openai.com/v1", apiKey:"", model:"gpt-4o-mini" }, data.settings||{});
   data.reverse = Object.assign({ extra:[] }, data.reverse||{});
+  data.tailor = data.tailor || {};   /* 每个岗位独立的定制会话：版本、决策、补充信息 */
   data.trash = data.trash || [];
   trashClean();   /* 启动时清掉超过 30 天的回收站条目 */
   /* 只有「从没建过」时才补示例；用户把最后一条删进回收站时不再自动冒出来 */

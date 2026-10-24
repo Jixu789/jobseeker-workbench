@@ -2,7 +2,7 @@
    策略：导航与代码类资源（html/css/js/manifest）走「网络优先」，保证内测改动立刻生效；
         图片/图标走「缓存优先」；两者在断网时都回退到缓存。
    缓存名带版本号，发版时改 CACHE 版本即可整体替换。 */
-const CACHE = "qicheng-shell-v4";
+const CACHE = "qicheng-shell-v5";
 const ASSETS = [
   "./",
   "./index.html",
@@ -21,7 +21,8 @@ const ASSETS = [
   "./assets/js/parts/12-interview.js",
   "./assets/js/parts/13-reverse.js",
   "./assets/js/parts/14-board.js",
-  "./assets/js/parts/15-boot.js",
+  "./assets/js/parts/15-tailor.js",
+  "./assets/js/parts/16-boot.js",
   "./manifest.webmanifest",
   "./assets/icons/qicheng.svg",
   "./assets/icons/qicheng-192.png",
